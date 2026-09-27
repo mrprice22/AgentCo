@@ -1,0 +1,14 @@
+# Normalize line endings in the repo to LF regardless of contributor OS.
+* text=auto eol=lf
+
+*.md     text
+*.jinja  text
+*.py     text
+*.yaml   text
+*.yml    text
+*.json   text
+
+*.png    binary
+*.jpg    binary
+*.db     binary
+*.sqlite binary
