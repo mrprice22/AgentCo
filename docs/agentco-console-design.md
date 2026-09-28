@@ -75,7 +75,7 @@ It keeps the component vocabulary too: `system-ui` 14px/1.45, 6px radii, `.badge
 
 | NWN choice | Why AgentCo differs |
 |---|---|
-| **One 10,400-line file** with the page embedded as a Python string | AgentCo's agents work in bounded tasks: at most 3 files, ~200 new lines, ~12K tokens of context (core engine design §6.2). A monolith can't be decomposed into T0-sized work. The presentation layer is built as **small modules, one page per module, each under ~300 lines** (§9.2). This is the single most important structural difference, and it follows directly from requirement 3. |
+| **One 10,400-line file** with the page embedded as a Python string | AgentCo's agents work in bounded tasks: at most 3 files, ~200 new lines, ~10K tokens of context (core engine design §6.2). A monolith can't be decomposed into T0-sized work. The presentation layer is built as **small modules, one page per module, each under ~300 lines** (§9.2). This is the single most important structural difference, and it follows directly from requirement 3. |
 | **YAML file as the database**, written by the editor | The engine's event log is the system of record (core engine design §11); the console never writes a store (monitor design §2) |
 | `http.server` from the standard library | The console core needs WebSockets (live feed, inbox, banner). FastAPI, as the monitor design already specifies. |
 | Publish = commit + push from the UI | Console releases go through the product delivery pipeline and the human's *Adopt* action (§8.4) |

@@ -344,7 +344,7 @@ New presentation pages (console design §5): **Knowledge** (search, article view
 |---|---|
 | Service management design §12–§14 | Known-error DB = known-error articles; runbooks = runbook articles; improvement register gains the lessons view; incident closure guard (reuse or capture) |
 | Core engine design §4.4, §10 | Work kinds `meeting`, `lesson`; ceremonies run as meetings; incident-closure guard in `workflow.yaml` |
-| Data layer design §5.1 | Topics `kb.*`, `mail.*`, `meeting.*`, `file.*` with classes |
+| Data layer design §5.1 | Topics `kb.*`, `mail.*`, `meeting.*`, `file.*` with classes — **done in data layer design v0.2** |
 | Agent API design §3 | `kb.*`, `mail.*`, `meeting.*`, `file.*` verbs and `kb_checked` on escalation (listed there) |
 | Change/config design §13 | Change failure rate computed from confirmed `caused_by` links |
 | Console design §5 | Knowledge, Lessons, Meetings, Mailboxes, and Files & deliverables pages; deliverable acceptance command |

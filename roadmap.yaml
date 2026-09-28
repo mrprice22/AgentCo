@@ -202,8 +202,9 @@ items:
     product: agentco
     group: design-docs
     phase: design
-    state: ready
+    state: done
     owner_role: bootstrap
+    date: "2026-09-27"
     title: "Refactor escalation design to v0.2"
     wsjf: { business_value: 8, time_criticality: 13, risk_reduction: 13, job_size: 5 }
     source:
@@ -220,12 +221,14 @@ items:
     product: agentco
     group: design-docs
     phase: design
-    state: ready
+    state: done
     owner_role: bootstrap
+    date: "2026-09-27"
     title: "Replace the token heuristic with context-fit routing; set tiers per job type"
     size_points: 3
     acceptance_criteria:
       - "§6.2 selects models by the context-fit rule (core engine §6.2); inputs over 10K tokens no longer route to the 16K-context model"
+      - "Fit is checked per ladder tier, counting the escalation packet; example bounds tightened to 10K/3K in core engine §6.2"
       - "§3 sets tiers per job type via org_chart.yaml; models.yaml keeps model definitions and routing rules only"
       - "The models.yaml example gives client_communications an escalation_ladder"
     source: ["docs/agentco-core-engine-design.md §18", "initial repo review 2026-09-27 (routing bug, missing ladder)"]
@@ -237,8 +240,9 @@ items:
     product: agentco
     group: design-docs
     phase: design
-    state: ready
+    state: done
     owner_role: bootstrap
+    date: "2026-09-27"
     title: "Worker contract v2: escalation.reason, and tier escalation vs. referral"
     size_points: 3
     acceptance_criteria:
@@ -255,8 +259,9 @@ items:
     product: agentco
     group: design-docs
     phase: design
-    state: ready
+    state: done
     owner_role: bootstrap
+    date: "2026-09-27"
     title: "Router policy checks: data-class ceiling, min_confidence, tools_allowed"
     size_points: 2
     acceptance_criteria:
@@ -272,8 +277,9 @@ items:
     product: agentco
     group: design-docs
     phase: design
-    state: ready
+    state: done
     owner_role: bootstrap
+    date: "2026-09-27"
     title: "Audit fields and tuning loop that proposes changes instead of making them"
     size_points: 1
     acceptance_criteria:
@@ -288,8 +294,9 @@ items:
     product: agentco
     group: design-docs
     phase: design
-    state: ready
+    state: done
     owner_role: bootstrap
+    date: "2026-09-27"
     title: "Degraded operation, alert channel, and CI scheduling slots"
     size_points: 2
     acceptance_criteria:
@@ -305,8 +312,9 @@ items:
     product: agentco
     group: design-docs
     phase: design
-    state: ready
+    state: done
     owner_role: bootstrap
+    date: "2026-09-27"
     title: "Naming fixes and open-question closure in the escalation design"
     size_points: 1
     acceptance_criteria:
@@ -325,8 +333,9 @@ items:
     product: agentco
     group: design-docs
     phase: design
-    state: ready
+    state: done
     owner_role: bootstrap
+    date: "2026-09-27"
     title: "Refactor data layer design to v0.2"
     wsjf: { business_value: 8, time_criticality: 8, risk_reduction: 13, job_size: 3 }
     source:
@@ -342,8 +351,9 @@ items:
     product: agentco
     group: design-docs
     phase: design
-    state: ready
+    state: done
     owner_role: bootstrap
+    date: "2026-09-27"
     title: "Envelope v2: data class, bus-stamped sender, trace and baseline fields"
     size_points: 2
     acceptance_criteria:
@@ -360,8 +370,9 @@ items:
     product: agentco
     group: design-docs
     phase: design
-    state: ready
+    state: done
     owner_role: bootstrap
+    date: "2026-09-27"
     title: "need_to_know.yaml: topic classes and new topics"
     size_points: 2
     acceptance_criteria:
@@ -377,8 +388,9 @@ items:
     product: agentco
     group: design-docs
     phase: design
-    state: ready
+    state: done
     owner_role: bootstrap
+    date: "2026-09-27"
     title: "Data layer wording fixes, store relationships, and open-question closure"
     size_points: 1
     acceptance_criteria:
@@ -630,10 +642,9 @@ items:
     phase: design
     state: ready
     owner_role: bootstrap
-    title: "Data layer and engine: Agent API as the only I/O, engagements, meetings, lessons"
+    title: "Core engine: engagements, change coordinator, meetings, lessons"
     size_points: 3
     acceptance_criteria:
-      - "Data layer §2 and §5.4 say the Agent API is the only I/O; topics engagement.*, kb.*, mail.*, meeting.*, file.* added with classes"
       - "Engine: change_coordinator in the org chart; job cycle starts with engagement.bind; engagement summary rendered after the directive"
       - "Engine: work kinds meeting and lesson; ceremonies run as meetings; incident-closure guard (reuse or capture)"
     source: ["docs/agentco-agent-api-policy-design.md §10", "docs/agentco-knowledge-collaboration-design.md §13"]
@@ -647,11 +658,10 @@ items:
     phase: design
     state: ready
     owner_role: bootstrap
-    title: "Governance, escalation, change/config: generated permissions and release path"
+    title: "Governance and change/config: generated permissions and release path"
     size_points: 2
     acceptance_criteria:
       - "Governance §2.2 points to config/raci.yaml; §6.2 least privilege via permissions.lock"
-      - "Escalation §3 tools_allowed replaced by generated permissions"
       - "Change/config: change coordinator, release assembly, production approval as an owner console command; change failure rate from confirmed caused_by links"
     source: ["docs/agentco-agent-api-policy-design.md §10", "docs/agentco-knowledge-collaboration-design.md §13"]
 

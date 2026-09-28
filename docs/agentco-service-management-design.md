@@ -521,8 +521,8 @@ New or extended views (monitor design §5):
 
 | Document | Change |
 |---|---|
-| Escalation design §5 | Add the conversation vs. operational-alert distinction (§1.3 here); human relay remains T3-only |
-| Escalation design §6.6 | Local-down routing to T2 is conditional on data class and budget; circuit breakers per supplier; T3 authority never fails over |
+| Escalation design §5 | Add the conversation vs. operational-alert distinction (§1.3 here); human relay remains T3-only — **done in escalation design v0.2** |
+| Escalation design §6.6 | Local-down routing to T2 is conditional on data class and budget; circuit breakers per supplier; T3 authority never fails over — **done in escalation design v0.2** |
 | Monitor design | External watchdog; notification adapter resolves "notification delivery"; service mode banner and new views — **done in monitor design v0.2** (§4.8, §5, §8) |
 | Core engine design §4.4, §7.1 | `human_request` gains urgency (engine-computed), deadline, default-on-expiry, impact-of-waiting; `provisional` decisions and `depends_on_provisional` tagging; `service_mode` and breaker state as scheduler inputs; model-affinity batching |
 | Governance design §4 | `risk_tolerance.yaml` gains `human_request_expiry`; `service_levels.yaml` added to the policy set as a governance CI |

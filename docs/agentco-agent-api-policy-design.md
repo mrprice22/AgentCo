@@ -361,8 +361,8 @@ Registry metrics (console design §7.1):
 
 | Document | Change |
 |---|---|
-| Data layer design §2, §5.4 | "Message bus is the only I/O" becomes "the Agent API is the only I/O; `mail.send` and publish are verbs on it". Topic `engagement.*` added |
-| Escalation design §3 | `tools_allowed` is replaced by generated permissions (`permissions.lock`) |
+| Data layer design §2, §5.4 | "Message bus is the only I/O" becomes "the Agent API is the only I/O; `mail.send` and publish are verbs on it". Topic `engagement.*` added — **done in data layer design v0.2** |
+| Escalation design §3 | `tools_allowed` is replaced by generated permissions (`permissions.lock`) — **done in escalation design v0.2** |
 | Core engine design §3.1, §8 | Org chart gains `change_coordinator`; the job cycle starts with `engagement.bind`; the prompt renderer inserts the engagement summary |
 | Governance design §2.2, §6.2 | RACI there becomes the human-level summary of `config/raci.yaml`; least privilege is implemented by generated permissions |
 | Change/config design §4, §9 | Change coordinator role; release assembly; production approval is an owner console command |

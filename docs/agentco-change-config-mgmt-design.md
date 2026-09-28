@@ -405,11 +405,11 @@ New or extended views in the monitor (monitor design §5):
 
 | Document | Change |
 |---|---|
-| Data layer design §4 | Envelope gains `baseline_id` (plus `model_ci` / `prompt_ci` on model-call records) |
-| Data layer design §5.1 | New topics `change.*` and `change.proposal.system`, the latter readable only by `executive_director` |
-| Escalation design §4.1 | `scope_violation` is detected by the driver's `files_touched` check at commit time, not only by self-report |
-| Escalation design §6.3 | CI jobs take slots in the local-resource scheduler |
-| Escalation design §8 | Tuning loop outputs change proposals, never direct config edits |
+| Data layer design §4 | Envelope gains `baseline_id` (plus `model_ci` / `prompt_ci` on model-call records) — **done in data layer design v0.2** |
+| Data layer design §5.1 | New topics `change.*` and `change.proposal.system`, the latter readable only by `executive_director` — **done in data layer design v0.2** |
+| Escalation design §4.1 | `scope_violation` is detected by the driver's `files_touched` check at commit time, not only by self-report — **done in escalation design v0.2** |
+| Escalation design §6.3 | CI jobs take slots in the local-resource scheduler — **done in escalation design v0.2** |
+| Escalation design §8 | Tuning loop outputs change proposals, never direct config edits — **done in escalation design v0.2** |
 | Monitor design | Change queue, configuration/baseline, canary, and release-history views; system-change approvals in the inbox — **done in monitor design v0.2** (§5.5, §5.11) |
 
 ---

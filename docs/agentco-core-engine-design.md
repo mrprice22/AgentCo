@@ -257,13 +257,13 @@ task_bounds:
     max_relevant_files: 3
     max_estimated_new_loc: 200
     max_acceptance_criteria: 3
-    max_context_tokens: 12000     # prompt + retrieved notes + file contents
-    max_output_tokens: 4000
+    max_context_tokens: 10000     # prompt + retrieved notes + file contents
+    max_output_tokens: 3000
   test_task:
     max_artifact_tokens: 10000
 ```
 
-**Context-fit rule.** `max_context_tokens + max_output_tokens` must fit in the *smallest* context window of any model at the job type's default tier, with prompt-template overhead added on top. The engine checks this at config load and refuses to start with a bound that can't fit. At dispatch, the router must only choose models whose context fits the assembled prompt. This fixes the current routing bug in escalation design §6.2, where inputs over 10K tokens are sent to the model with the *smaller* 16K window.
+**Context-fit rule.** For every tier on the job type's ladder, at least one model at that tier must fit `max_context_tokens + max_output_tokens` plus prompt-template overhead plus the escalation packet that tier would receive (escalation design §4.3, §6.2). T1's 16K window is the binding limit for ladders that include it, which is why the example above is 10K/3K. The engine checks this at config load and refuses to start with a bound that can't fit. At dispatch, the router only chooses models whose context fits the assembled prompt, which fixes v0.1's routing bug (inputs over 10K tokens sent to the model with the *smaller* 16K window).
 
 ---
 
@@ -562,10 +562,10 @@ The engine is buildable, and useful, before any model is connected:
 
 | Document | Change |
 |---|---|
-| Escalation design §3 | Tier set per **job type** (`org_chart.yaml`), not per role; `models.yaml` keeps model definitions and routing rules |
-| Escalation design §4.1, §7 | Worker contract gains `escalation.reason` / `question` / `blocking`; new triggers `rework_exhaustion` and `data_class_ceiling`; distinguish tier escalation from referral |
-| Escalation design §6.2 | Replace the token-count heuristic with the context-fit rule (§6.2 here) |
-| Data layer design §4 | Envelope gains `correlation_id` / `causation_id` |
+| Escalation design §3 | Tier set per **job type** (`org_chart.yaml`), not per role; `models.yaml` keeps model definitions and routing rules — **done in escalation design v0.2** |
+| Escalation design §4.1, §7 | Worker contract gains `escalation.reason` / `question` / `blocking`; new triggers `rework_exhaustion` and `data_class_ceiling`; distinguish tier escalation from referral — **done in escalation design v0.2** |
+| Escalation design §6.2 | Replace the token-count heuristic with the context-fit rule (§6.2 here) — **done in escalation design v0.2** |
+| Data layer design §4 | Envelope gains `correlation_id` / `causation_id` — **done in data layer design v0.2** |
 | Monitor design | Driver hosts the engine; ceremony scheduler becomes a clock adapter; historical replay is provided by the event log — **done in monitor design v0.2** (§4.1, §4.3, §5.7) |
 | Prompt templates | Developer/Tester/Scrum Master/Architect/PO: "escalate to X" wording replaced with emitting `escalation.reason`; Architect gains a `decompose_story` template |
 

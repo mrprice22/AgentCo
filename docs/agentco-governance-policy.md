@@ -359,10 +359,10 @@ This isn't a formal baseline selection (AgentCo is a single-operator system with
 
 | Document | Change |
 |---|---|
-| Escalation design §3, §6 | Router checks data-class ceiling before dispatch; new trigger `data_class_ceiling`; per-role `min_confidence` sourced from `risk_tolerance.yaml`; `tools_allowed` per role |
-| Escalation design §8 | Audit entries carry `controls`, `baseline_id`, and hash chain fields |
-| Data layer design §4 | Envelope gains `data_class` (derived from topic); `from` is stamped by the bus, not the sender |
-| Data layer design §5.1 | `need_to_know.yaml` gains `topic_classes` |
+| Escalation design §3, §6 | Router checks data-class ceiling before dispatch; new trigger `data_class_ceiling`; per-role `min_confidence` sourced from `risk_tolerance.yaml`; `tools_allowed` per role (`tools_allowed` superseded by generated permissions) — **done in escalation design v0.2** |
+| Escalation design §8 | Audit entries carry `controls`, `baseline_id`, and hash chain fields — **done in escalation design v0.2** |
+| Data layer design §4 | Envelope gains `data_class` (derived from topic); `from` is stamped by the bus, not the sender — **done in data layer design v0.2** |
+| Data layer design §5.1 | `need_to_know.yaml` gains `topic_classes` — **done in data layer design v0.2** |
 | Monitor design | Localhost-by-default + authenticated sessions for write actions (resolves open question) — **done in monitor design v0.2** (§10) |
 | All prompt templates | Render thresholds from `{{ min_confidence }}`; add the untrusted-content handling statement |
 
