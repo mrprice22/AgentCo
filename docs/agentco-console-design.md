@@ -145,6 +145,8 @@ Some pages are where the human decides things or checks the company's honesty. T
 - **Service-mode banner** (always visible in the shell frame)
 - **Inbox** and **Decision log** (resolved without you)
 - **Approvals:** system changes, production deployments, risk acceptances
+- **Pre-approval rules:** the standard-change catalog, with its backtest preview (change/config design §4.3)
+- **Change approval meetings:** the owner's seat, where agenda items are approved with buttons (change/config design §5.1)
 - **Changes & baselines**, **Audit log**, **Compliance**
 - **Company scorecard:** the canonical metrics the human uses to judge the company (§7.2)
 - **Settings**, **Users**, the Start / Pause control
@@ -191,14 +193,14 @@ The navigator follows NWN's shape: sections of one-link-per-line entries, filter
 
 | Section | Pages |
 |---|---|
-| **Inbox** | ● Inbox · ● Decision log · ● Approvals · ○ My chat threads |
+| **Inbox** | ● Inbox · ● Decision log · ● Approvals · ● Change approval meetings · ○ My chat threads |
 | **Company** | ○ Overview (home) · ○ Org chart & agents · ○ Iteration board · ○ Backlog (board / list) · ○ PI & roadmap · ○ Work queues by role |
 | **Portfolio** | ○ Portfolio overview · ○ Portfolio Kanban · ○ Products (one per product, including the Console) · ○ Budgets & capacity allocation |
 | **Claude** | ○ Talk to the company (chat) · ○ Discuss… (item-scoped chats) · ○ Conversation history |
 | **Metrics** | ● Company scorecard · ○ Flow metrics · ○ DORA · ○ Cost & capacity · ○ Service levels · ○ Forecasts & what-if · ○ Role dashboards (one per role, agent-maintained, §7.3) · ○ My dashboards |
 | **Operations** | ○ Live feed · ○ Traces & replay · ○ Incidents & problems · ○ Agent health · ● Changes & baselines · ○ Releases |
 | **Compliance** | ● Controls & evidence · ● SSDF gates · ● Risk acceptances · ● Model inventory · ● Directive metrics |
-| **Manage** | ● Settings · ● Users · ● Notifications |
+| **Manage** | ● Settings · ● Pre-approval rules · ● Users · ● Notifications |
 | **Console** | ○ Improve this page… (feedback) · ○ Console roadmap · ● Preview & adopt |
 
 ### 5.1 Key presentation pages
@@ -257,6 +259,10 @@ Typing "approve change 42" or "deploy it" in chat **never** approves or deploys 
 - **Cost:** every thread shows its cost. There's no separate chat budget (owner decision, 2026-09-27). The owner controls spend with the business simulation's **Start / Pause** button (monitor design §4.2). While paused, no model is called; chat messages queue with an acknowledgment and are answered after Start.
 - **During `t3_down`:** the chat shows the service mode and queues messages, which are answered on recovery. It never falls back to a lower-tier model (service management design §4.3).
 - **Rendering:** reply text is rendered through a sanitizing allow-list (the same idea as NWN's rich-text whitelist for `notes`): basic formatting, internal deep links (`/#…`), and metric widgets only. There's no raw HTML and no external links unless allow-listed. Agent-authored content is framed with the `--agent-authored` border.
+
+### 6.6 The owner's composer
+
+Chat and meeting messages from the owner are writes, and the presentation layer is agent-built, so the text box itself belongs to the core. The **composer** is a core-owned input rendered in the shell, outside the presentation frame, and used for chat, meeting contributions, and feedback notes. Presentation pages can open it pre-addressed (to a thread, a meeting, or an item) but can't fill in or submit text; only the owner's keystrokes reach it. Those words carry no authority (§6.4), but a forged "client note" could still mislead agents, so agent-built UI must not be able to write one.
 
 ---
 

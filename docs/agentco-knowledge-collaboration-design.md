@@ -233,11 +233,22 @@ A meeting has a **topic scope**, and every invitee must be cleared for all of it
 
 ### 7.5 Ceremonies are meetings
 
-Planning, retros, incident reviews, and change reviews (CAB preparation) become meetings of this form. The daily standup stays a cheap status aggregation by the Scrum Master: no deliberation needed, so it isn't worth multi-agent turns.
+Planning, retros, incident reviews, and change reviews (the owner-attended change approval meeting, change/config design §5.1) become meetings of this form. The daily standup stays a cheap status aggregation by the Scrum Master: no deliberation needed, so it isn't worth multi-agent turns.
 
 ### 7.6 The owner in meetings
 
-The owner can **observe** any meeting live or replayed (monitor design §5.7), since the console reads everything. The owner doesn't speak to agents directly (company directive D12, one voice). To contribute, the owner messages Client Communications, which can add the input to the agenda as a clearly labeled *client note*.
+The owner can **observe** any meeting live or replayed (monitor design §5.7), since the console reads everything.
+
+The owner can also **take part** in the meeting types listed in `config/policy/owner_meetings.yaml`, a governance configuration item only the owner changes. Owner decision (2026-09-27): for now, that's the **change approval meeting** (change/config design §5.1). Directive D12 (v1.2) carries the matching exception: in a meeting the owner has joined, participants answer the owner directly and stay on the agenda.
+
+Rules for owner-attended meetings:
+- The owner's messages come from the console's core-owned composer (console design §6.6), so agent-built UI can't put words in the owner's mouth.
+- The owner's words are content to agents (D7) and Confidential client communication. They grant no permissions, and participant turns route only to tiers cleared for Confidential.
+- Decisions are made with buttons (the trusted confirmation dialog), never with text.
+- Agent turns run at the owner's pace: when the agenda moves or the owner asks something.
+- Agents can't use a meeting to raise new topics with the owner; those still go through escalation and `human_relay`.
+
+For every other meeting type, the owner contributes through Client Communications, which adds the input to the agenda as a clearly labeled *client note*.
 
 ---
 

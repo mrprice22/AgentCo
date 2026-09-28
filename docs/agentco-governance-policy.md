@@ -92,7 +92,7 @@ autonomy:
     - legal_or_compliance_risk_acceptance
     - ambiguous_original_intent
     - explicit_human_request_to_be_asked
-    - production_deployment
+    - production_deployment        # unless the owner's pre-approval catalog covers it (change/config §4.3)
     - new_remote_supplier_or_data_class_exception
     - governance_config_change
 

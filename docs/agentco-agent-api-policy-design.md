@@ -166,6 +166,8 @@ A = accountable (exactly one), R = responsible, C = consulted, I = informed. **C
 | Merge to trunk | | | | | A | I | I | | | | R |
 | Assemble release | | | | A | C | | C | | I | R | |
 | Approve production release | A | C | | I | | | C | | | R | |
+| Set the pre-approval catalog | A/R | C | | | C | | | C | | C | |
+| Chair the change approval meeting | A/R | C | | | C | | C | C | | R | R |
 | Deploy to production | A | I | | | | | C | | | C | R |
 | Incident response | A | I | | | C | | | C | I | | R |
 | Problem root cause | I | A | | | R | | | C | C | | |
@@ -178,7 +180,7 @@ A = accountable (exactly one), R = responsible, C = consulted, I = informed. **C
 | Change RACI or permissions | A | R | | | C | | | C | | | |
 | Start / Pause the simulation | A/R | | | | | | | | | | I |
 
-**"Author knowledge article"** means R for whichever role resolved the issue, with the Scrum Master accountable as knowledge manager. **"Approve standard change"** has the owner as A because the owner approved the list of pre-authorized change types; the driver applies it mechanically.
+**"Author knowledge article"** means R for whichever role resolved the issue, with the Scrum Master accountable as knowledge manager. **"Approve standard change"** has the owner as A because the owner sets the pre-approval catalog (change/config design §4.3); the driver applies it mechanically. In the change approval meeting, the change coordinator presents and the driver facilitates.
 
 ---
 
@@ -207,7 +209,7 @@ The owner's example: *a developer can't commit directly to production; the work 
 4. On pass, the change is **merged to trunk** by the driver, as a standard change if it qualifies, or after the right **A** approves the CR (§4.4).
 5. The **change coordinator** adds approved, merged changes to a **release candidate** alongside other updates, with the evidence bundle (tests, scans, SBOM, change records).
 6. The release is deployed to **staging** automatically, and Tester-generated smoke tests run.
-7. **Approval for production** is requested from the **owner**, acting as change manager, in the console inbox. It's a console command behind the trusted dialog, and no agent verb exists for it (§4.3).
+7. **Approval for production** is requested from the **owner**, acting as change manager, in the **change approval meeting** or the console inbox (change/config design §5.1), unless every change in the release matches a pre-approval entry that reaches production (change/config design §4.3). It's a console command behind the trusted dialog, and no agent verb exists for it (§4.3).
 8. The **driver** deploys, runs smoke tests, and rolls back automatically on failure (change/config design §9).
 
 At no step does any agent hold a capability that could shortcut the next one.

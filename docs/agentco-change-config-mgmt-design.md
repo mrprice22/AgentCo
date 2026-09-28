@@ -1,6 +1,6 @@
 # AgentCo — Change, Configuration & Release Management
 
-**Design document v0.1**
+**Design document v0.2** (v0.2: owner-set pre-approval catalog §4.3; owner-attended change approval meeting §5.1)
 **Scope:** How anything in AgentCo changes. That covers the product code agents build for the client and AgentCo's own prompts, models, configs, and policies. For every change, this doc says how it's identified, classified, approved, baselined, released, and reversed. Covers ITIL 4 change enablement, service configuration management, release management, and deployment management; NIST SP 800-53 CM family; SSDF PS group and parts of PO/PW (see governance design §9).
 
 ---
@@ -104,10 +104,10 @@ Change class is **computed by the driver from the change itself** (paths touched
 
 | Type | Criteria (computed) | Change authority | Required evidence |
 |---|---|---|---|
-| **Standard** (pre-authorized) | Touches only the task's `relevant_files`; no dependency, schema, public API, or infra change | Automatic: driver merges when every gate passes | CI green, Tester pass, SAST/secret/SCA clean, Security Reviewer pass |
+| **Standard** (pre-authorized) | Matches an entry in the owner's pre-approval catalog (§4.3). The built-in entry: touches only the task's `relevant_files`; no dependency, schema, public API, or infra change | Automatic: driver merges when every gate passes | CI green, Tester pass, SAST/secret/SCA clean, Security Reviewer pass |
 | **Normal — minor** | Adds/upgrades a dependency, changes a schema or public interface, touches infra-as-code, or spans more than one story | Architect (+ Security Reviewer for new dependencies) | Above + impact analysis |
 | **Normal — major** | Breaking change, data migration on real data, or anything irreversible | Executive Director; **human** if it matches `always_human` in `risk_tolerance.yaml` | Above + rollback plan |
-| **Production deployment** | Any promotion to a production environment | **Human** (governance design §4: `production_deployment`) | Release record (§9) |
+| **Production deployment** | Any promotion to a production environment | **Human**, in the change approval meeting or the inbox (§5.1), unless every change in the release matches a pre-approval entry that reaches production (§4.3) | Release record (§9) |
 | **Emergency** | Fix for an active incident or confirmed vulnerability | Architect + Security Reviewer; human notified immediately | Post-implementation review within one sprint |
 
 ### 4.2 System changes
@@ -119,6 +119,56 @@ Change class is **computed by the driver from the change itself** (paths touched
 | **System-emergency** | Something is actively wrong | **Human** via monitor | The only emergency actions are **pause** (kill switch) and **revert to a previous approved baseline**. There's no emergency hot-edit path: an emergency fix is a normal change, applied quickly. |
 
 Keeping system-emergency limited to "pause or roll back" means there is no route, under pressure, to changing agent behavior without review.
+
+### 4.3 The pre-approval catalog (owner-set)
+
+Standard changes are pre-authorized by the owner, and **the owner sets the conditions** (owner decision, 2026-09-27). The catalog is `config/policy/preapproval.yaml`, edited on the console's **Pre-approval rules** page, which is a protected page (console design §3.4). Each entry is an ITIL *standard change model*: a routine, low-risk kind of change with a known procedure.
+
+```yaml
+entries:
+  - id: code-within-task-scope          # the built-in entry
+    description: "Code change inside the task's relevant_files"
+    applies_to: product
+    reaches: trunk                      # trunk | staging | production
+    conditions:
+      max_files: 3
+      max_changed_lines: 200
+      paths_deny: ["migrations/**", "infra/**", "**/auth/**"]
+      forbid: [new_dependency, schema_change, public_api_change]
+      require_gates: [ci_green, tester_pass, security_pass, secret_scan_clean]
+      min_coverage_delta: 0
+    respect_freeze_windows: true
+    review_by: "2026-12-31"
+    suspend_if: { change_failure_rate_over: 0.10, min_changes: 20 }
+
+  - id: dependency-patch-bump
+    description: "Patch-level dependency upgrade with no known vulnerabilities"
+    applies_to: product
+    reaches: staging
+    conditions:
+      semver: patch
+      require: [sca_clean, license_allowed]
+      require_gates: [ci_green, tester_pass]
+    review_by: "2026-12-31"
+
+  - id: docs-and-tests-only
+    description: "Documentation or test files only"
+    applies_to: product
+    reaches: production
+    conditions:
+      paths_allow: ["docs/**", "tests/**", "**/*.md"]
+      require_gates: [ci_green]
+    review_by: "2026-12-31"
+```
+
+**Rules:**
+- **Deterministic matching.** The driver matches a change against the catalog using the diff and gate results. A change is standard only if it satisfies *every* condition of one entry; otherwise it's a normal change.
+- **`reaches` limits how far pre-approval carries.** With `trunk`, the change merges without approval, but its production release still needs the owner, in the change approval meeting or the inbox (§5.1). With `production`, a release made *only* of such changes deploys without a meeting. That's the owner choosing to pre-authorize production for that routine, which is the one exception to `production_deployment` in governance design §4.
+- **Every entry expires.** A `review_by` date is required; an expired entry stops matching and appears in the inbox for renewal, like a risk acceptance.
+- **The system can tighten, never loosen.** If changes matching an entry cause incidents too often (confirmed `caused_by` links, knowledge design §3.1), the entry is **suspended automatically** and matching changes become normal changes until the owner re-enables it. Nothing automatic ever widens an entry.
+- **Editing shows its consequences.** Before the owner confirms an edit, the console shows the diff and a **backtest** against the change history, for example: *"Under these rules, last PI's 42 changes: 31 standard (+6). None of the 6 newly standard changes caused an incident."* Saving needs re-authentication. It's recorded as a system change that the owner both requested and approved, with a new baseline.
+- **Agents can propose entries,** for example when the change coordinator sees a routine pattern, through the normal proposal path (§6). Only the owner approves.
+- **No pre-approval for rules.** Entries with `applies_to: system` may only cover the operational items in §4.2 (security patches, log rotation, identical-hash re-downloads). The console refuses an entry that would pre-approve a prompt, model, policy, RACI, engagement, or catalog change.
 
 ---
 
@@ -157,6 +207,19 @@ Change records are canonical records under `change.*` (data layer design §3.4),
 - **Post-implementation review (PIR):** mandatory for emergency changes, failed changes, and rollbacks. The PIR outcome feeds problem management (service management design).
 
 There's **no change advisory board**. Each change type has a single change authority (§4), which is the ITIL 4 model and fits a one-human organization. An optional **change freeze** window (default: the day of System Demo, SAFe design) can be set in `agile.yaml`.
+
+### 5.1 The change approval meeting
+
+The owner attends change approval meetings in person (owner decision, 2026-09-27). For now, it's the one meeting type where the owner speaks with agents directly (knowledge design §7.6; company directive D12, v1.2).
+
+- **When:** whenever a release candidate is ready for production and isn't covered by pre-approval, when system changes await approval, and at least once per PI if anything is pending. The owner can also call one from the inbox. For emergency changes a short emergency meeting is offered, and the owner may approve from the inbox instead.
+- **Agenda:** built by the change coordinator from items that need the owner: production releases, system changes, normal-major changes the owner is consulted on, pre-approval entries due for review or suspended, and the change-failure report since the last meeting.
+- **Participants:** the owner (chair and change authority), the change coordinator (presents), the Architect, Security Reviewer, Tester, and Executive Director (business risk). Each item's evidence is in the meeting pane: tests, scans, SBOM, the incident history of the components it touches, and backtests.
+- **How it runs:** the engine facilitates (knowledge design §7.2), at the owner's pace. Agent turns run only when the agenda moves or the owner asks something. A directed question (*"Security, what's the residual risk?"*) goes to that participant's next turn. Agents can't raise topics outside the agenda.
+- **Decisions are buttons.** *Approve*, *Approve with conditions*, *Reject*, or *Defer* on each item, each a console command behind the trusted confirmation dialog. Text in the meeting never approves anything (console design §6.4). Conditions become action items or release gates.
+- **If the owner doesn't attend,** the items stay in the inbox exactly as before. Nothing is approved by default.
+- **Data class:** the owner's words are Confidential client communication, so participant turns in an owner-attended meeting route only to tiers cleared for Confidential (local tiers and T3), never to T2 while its ceiling is Internal (governance design §5.2).
+- **Record:** minutes, each decision with the approver's session identity and HMAC, conditions, and links to the release and change records.
 
 ---
 

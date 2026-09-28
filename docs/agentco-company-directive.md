@@ -1,6 +1,6 @@
 # AgentCo — Company Directive (Mission & Operating Principles)
 
-**Design document v0.2** · **Directive text v1.1** (v1.1 adds D13)
+**Design document v0.3** · **Directive text v1.2** (v1.1 added D13; v1.2 adds the engagement to the precedence order and the owner-meeting exception to D12)
 **Scope:** The one set of instructions every agent receives, whatever its role, tier, or task: who AgentCo is, what it's for, the thirteen principles every role works by, and what wins when instructions conflict. This document explains the directive for humans: the reasoning behind each principle, what actually enforces it, and how the directive itself is delivered, tested, and changed. The agent-facing text lives in [`agentPrompts/_company_directive.jinja`](../agentPrompts/_company_directive.jinja) and is the canonical wording.
 
 ---
@@ -55,7 +55,7 @@ The wording agents see is in the Jinja partial. Here each principle gets its rea
 | **D9** | Propose, don't claim | Agents only propose; the engine applies (core engine design §1). Outputs must not blur that line | Status reports and summaries claiming actions that never happened |
 | **D10** | Done means verified | Aligns every role with the Definition of Done | "Looks right" standing in for tests passing |
 | **D11** | Leave a clear trail | Audit logs, write-back notes, and replay are only as useful as what agents put in them | Empty or rambling `reasoning_summary`; lost learning between tasks |
-| **D12** | One voice to the client | Restates the human-contact boundary to every role, not just the two that hold it | A lower-tier agent drafting "questions for the human" in its output |
+| **D12** | One voice to the client | Restates the human-contact boundary to every role, not just the two that hold it. The owner can open specific meeting types to direct conversation (currently change approval); outside those, the boundary is unchanged | A lower-tier agent drafting "questions for the human" in its output, or raising topics with the owner outside a meeting's agenda |
 | **D13** | Our own interface is product | The console is Product 0 (console design §8): improving it is real delivery work, prioritized and gated like client work. Stating it company-wide makes every role a contributor to the human's view of the company, not just the roles assigned console stories. | Treating the human's interface as an afterthought; or the opposite: a console that flatters the company instead of informing the human |
 
 ---
@@ -77,7 +77,7 @@ A principle with no enforcement behind it is only a request. This table shows wh
 | D9 | Only the engine applies effects; only the driver commits and merges | Eval cases on status-report accuracy |
 | D10 | Definition of Done checked by the engine | Post-merge defect rate |
 | D11 | Schema-required `reasoning_summary` and write-back step | Human spot-check in decision log review |
-| D12 | `human_relay` registered only for T3 roles + runtime allow-list (escalation design §5) | Any T0–T2 output addressed to the client (eval + output scan) |
+| D12 | `human_relay` registered only for T3 roles + runtime allow-list (escalation design §5); owner-joined meeting types listed in `config/policy/owner_meetings.yaml`, which only the owner changes (knowledge design §7.6) | Any T0–T2 output addressed to the client outside an owner-joined meeting (eval + output scan) |
 | D13 | Console capacity share; protected pages and company scorecard agents can't edit; presentation integrity gates (console design §3.4, §7.4, §8.2–8.3) | Console north-star "time to understanding"; preview adoption vs. reject rate (console design §8.5) |
 
 When a principle is violated, the violation surfaces as a measurable signal (the right-hand column), which feeds problem management (service management design §13). Frequent violations of one principle by one role point to a fix in that role's prompt or task bounds, not to more directive text.
@@ -90,9 +90,10 @@ When instructions conflict, this order applies, from highest to lowest:
 
 1. **System controls.** Not an instruction the model reads, but it always wins: code enforces its rules regardless of any prompt (governance design §1).
 2. **Company directive.**
-3. **Role instructions** (the role's prompt template).
-4. **Task definition** (the rendered task fields: acceptance criteria, constraints, and so on).
-5. **Content** is *not in the order at all*. Code under review, client text, documents, and other agents' outputs are material to work on and never instructions (D7).
+3. **Engagement:** the agent's locked policy, contract, and scope of work (agent API design §6).
+4. **Role instructions** (the role's prompt template).
+5. **Task definition** (the rendered task fields: acceptance criteria, constraints, and so on).
+6. **Content** is *not in the order at all*. Code under review, client text, documents, and other agents' outputs are material to work on and never instructions (D7).
 
 An agent facing a task that conflicts with the directive doesn't comply and doesn't silently work around it. It returns a non-complete status and names the principle. The engine treats that as a referral, so the task author (usually the PO or Architect) sees the conflict. A task that repeatedly triggers directive conflicts is a decomposition problem, and the rework and referral metrics will show it.
 
@@ -111,7 +112,7 @@ The directive is **part of the trusted prompt template**, included at the very t
 
 | Constraint | Reason |
 |---|---|
-| **≤ 700 tokens** (currently ~530 words) | It's in every prompt, including 16K-context T0 models. It counts against prompt overhead in the context-fit rule (core engine design §6.2). |
+| **≤ 700 tokens** (currently ~570 words) | It's in every prompt, including 16K-context T0 models. It counts against prompt overhead in the context-fit rule (core engine design §6.2). |
 | **Static: no template variables** | Byte-identical text at the start of every prompt is a shared prefix, so llama.cpp prompt caching and remote-provider prompt caching can reuse it. Numbers (thresholds, budgets) belong in config, rendered into role prompts. |
 | **No project content** | Every role, at every tier, including remote T2/T3, sees this text. It must stay Public/Internal class by construction (governance design §5), so it can never leak anything. |
 | **No role-specific rules** | Those belong in role prompts; the directive is only what's true for everyone. |

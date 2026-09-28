@@ -314,6 +314,7 @@ items:
       - "§9 concurrency-ceiling question links to story-bench-concurrency-ceiling"
       - "§9 daily_spend_limit marked resolved by governance §4 and core engine §13"
       - "Version table added (v0.2)"
+      - "§1 goal 3 and §5 note the owner-joined meeting exception (directive v1.2 D12; change/config §5.1)"
     source: ["initial repo review 2026-09-27 (store naming)", "docs/agentco-escalation-design.md §9"]
 
   # ── Data layer design v0.2 ────────────────────────────────────────────────
@@ -678,15 +679,28 @@ items:
     product: agentco
     group: prompts
     phase: design
-    state: ready
+    state: done
     owner_role: bootstrap
     title: "Directive v1.2: add the engagement to the precedence order"
     size_points: 1
+    date: "2026-09-27"
     acceptance_criteria:
       - "Directive doc §5 and the partial's conflict paragraph read: system controls, directive, engagement policy, role instructions, task"
       - "All eight prompts still render"
     notes: "A directive change is a system change: the owner approves it."
     source: ["docs/agentco-agent-api-policy-design.md §6.5"]
+
+  - id: feat-cab-preapproval-design
+    kind: feature
+    nature: enabler
+    parent: epic-design-consistency
+    product: agentco
+    group: design-docs
+    phase: design
+    state: done
+    owner_role: bootstrap
+    title: "Owner-attended change approval meeting and owner-set pre-approval catalog"
+    date: "2026-09-27"
 
   - id: feat-owner-actions-0927
     kind: feature
@@ -1523,6 +1537,19 @@ items:
     wsjf: { business_value: 5, time_criticality: 2, risk_reduction: 3, job_size: 3 }
     source: ["docs/agentco-knowledge-collaboration-design.md §8"]
 
+  - id: feat-p2-preapproval
+    kind: feature
+    nature: enabler
+    parent: epic-build-p2
+    product: agentco
+    group: governance
+    phase: p2
+    state: draft
+    owner_role: bootstrap
+    title: "Pre-approval catalog: matching, reach, expiry, auto-suspension, backtests"
+    wsjf: { business_value: 13, time_criticality: 5, risk_reduction: 8, job_size: 5 }
+    source: ["docs/agentco-change-config-mgmt-design.md §4.3"]
+
   # ── Phase 3 ───────────────────────────────────────────────────────────────
   - id: epic-build-p3
     kind: epic
@@ -1644,6 +1671,20 @@ items:
     title: "Document store and deliverables with owner acceptance"
     wsjf: { business_value: 8, time_criticality: 2, risk_reduction: 3, job_size: 5 }
     source: ["docs/agentco-knowledge-collaboration-design.md §9"]
+
+  - id: feat-p3-cab
+    kind: feature
+    nature: business
+    parent: epic-build-p3
+    product: agentco
+    group: governance
+    phase: p3
+    state: draft
+    owner_role: bootstrap
+    title: "Change approval meeting with the owner as chair"
+    depends_on: [feat-p3-meetings, feat-p3-release-train]
+    wsjf: { business_value: 13, time_criticality: 3, risk_reduction: 8, job_size: 5 }
+    source: ["docs/agentco-change-config-mgmt-design.md §5.1", "docs/agentco-knowledge-collaboration-design.md §7.6"]
 
   # ── Phase 4 ───────────────────────────────────────────────────────────────
   - id: epic-build-p4
@@ -1987,6 +2028,44 @@ items:
     title: "Start / Pause control in the shell banner, with phone-push mirroring"
     depends_on: [feat-p1-run-control]
     source: ["owner decisions 2026-09-27", "docs/agentco-monitor-driver-design.md §5.1"]
+
+  - id: story-ca-preapproval-page
+    kind: story
+    nature: business
+    parent: feat-ca-protected-pages
+    product: console
+    group: console-core
+    phase: console-a
+    state: draft
+    owner_role: bootstrap
+    title: "Pre-approval rules page with diff, backtest, and re-auth save"
+    depends_on: [feat-p2-preapproval]
+    source: ["docs/agentco-change-config-mgmt-design.md §4.3", "docs/agentco-console-design.md §3.4"]
+
+  - id: story-ca-meeting-seat
+    kind: story
+    nature: business
+    parent: feat-ca-protected-pages
+    product: console
+    group: console-core
+    phase: console-a
+    state: draft
+    owner_role: bootstrap
+    title: "Owner seat in change approval meetings, with per-item decision buttons"
+    depends_on: [feat-p3-cab, story-ca-composer]
+    source: ["docs/agentco-change-config-mgmt-design.md §5.1", "docs/agentco-console-design.md §3.4"]
+
+  - id: story-ca-composer
+    kind: story
+    nature: enabler
+    parent: feat-ca-commands
+    product: console
+    group: console-core
+    phase: console-a
+    state: draft
+    owner_role: bootstrap
+    title: "Core-owned composer for chat, meeting, and feedback messages"
+    source: ["docs/agentco-console-design.md §6.6"]
 
   - id: feat-ca-min-ui
     kind: feature
@@ -2497,7 +2576,7 @@ items:
     product: agentco
     group: decisions
     phase: p3
-    state: awaiting_human
+    state: done
     owner_role: human
     title: "How does the owner take part in agent meetings?"
     question: "Observe and contribute through Client Communications, or speak in meetings directly?"
@@ -2506,6 +2585,10 @@ items:
       - { id: b, label: "Speak directly in meetings" }
     recommended: a
     notes: "Option b would need an exception to directive D12 (one voice to the client)."
+    resolution: >-
+      Scoped direct participation (option b): the owner joins designated meeting types, for now
+      the change approval meeting. Directive v1.2 D12 exception; config/policy/owner_meetings.yaml.
+    date: "2026-09-27"
     source: ["docs/agentco-knowledge-collaboration-design.md §7.6"]
 
   - id: dec-architect-sod
