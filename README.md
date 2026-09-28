@@ -22,7 +22,16 @@ An LLM-staffed software "company": role-based agents (Developer, Tester, Archite
 
 Suggested reading order: company directive → core engine → escalation → data layer → monitor/driver → console → governance → change/config → service management.
 
-Planned: SAFe/PMO delivery (roles, PI planning, WSJF, RAID log, flow and DORA metrics).
+Planned: SAFe/PMO delivery (roles, PI planning, WSJF, RAID log, flow and DORA metrics). Tracked as `feat-safe-pmo-doc` in the roadmap.
+
+## Roadmap
+
+[`roadmap.yaml`](roadmap.yaml) is the backlog: every outstanding change, open question, build phase, and owner decision from the design docs, as epics → features → stories plus decision items, in the engine's work-model schema (see console design §5.2). Validate after editing:
+
+```
+pip install pyyaml
+python bin/roadmap-lint.py --summary
+```
 
 ## Agent prompts
 

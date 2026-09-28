@@ -207,6 +207,15 @@ The navigator follows NWN's shape: sections of one-link-per-line entries, filter
 - **Portfolio Kanban:** epics across products through the SAFe portfolio states (Funnel → Reviewing → Analyzing → Ready → Implementing → Done), each card carrying its Lean business case and WSJF. Details come in the SAFe/PMO design.
 - **Budgets & capacity allocation:** how paid budget and local capacity are split across products (§8.2), with actual against allocated.
 
+### 5.2 The bootstrap backlog: `roadmap.yaml`
+
+Until the engine exists, the backlog lives in [`roadmap.yaml`](roadmap.yaml) at the repo root, in the NWN `roadmap.yaml` tradition: stable IDs, groups, `notes`/`impl_notes`, and `date`/`commit` on shipped items. Its schema *is* the engine's work model (core engine design §4): epics, features, stories, tasks, and decision items, using the engine's state names. So the console's first page can be built before the engine (roadmap item `feat-ca-roadmap-board`):
+- the Backlog board uses `meta.board_lanes`
+- the Portfolio Kanban uses `meta.portfolio_lanes`
+- decision items render like inbox entries
+
+Build phase 0 imports the file into the engine as seed events (`feat-p0-seed-import`). After that, the engine is the system of record and `roadmap.yaml` becomes a generated export. `bin/roadmap-lint.py` validates the file (structure, references, states per kind, Definition of Ready, dependency cycles) and runs in the AgentCo repo's CI.
+
 ---
 
 ## 6. Talking to Claude

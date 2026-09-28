@@ -1,0 +1,2063 @@
+# AgentCo roadmap — the single source of truth for planned work.
+#
+# Schema: the engine's work model (agentco-core-engine-design.md §4) in the
+# NWN roadmap.yaml tradition (stable ids, groups, notes/impl_notes, date+commit
+# on shipped items). The console's Backlog board and Portfolio Kanban read this
+# file directly until the engine is live; build phase 0 then imports it into the
+# engine's event log as seed events (see feat-p0-seed-import) and the engine
+# becomes the system of record. Validate with:  python bin/roadmap-lint.py
+#
+# Item fields
+#   id                 required  lowercase-hyphen, unique, stable (deep link: /#item-<id>)
+#   kind               required  epic | feature | story | task | decision
+#   title              required  <= 100 chars (same cap as NWN, kept for thread/card names)
+#   product            required  products[].id
+#   group              required  groups[].id (navigator / board grouping)
+#   state              required  see meta.states for the kind
+#   owner_role         required  human | bootstrap (human + Claude Code) | an AgentCo role
+#   nature             epic/feature/story/task: business | enabler
+#   parent             feature -> epic, story -> feature, task -> story; decisions may name any item
+#   phase              optional  meta.phases[].id
+#   description        optional  plain text
+#   acceptance_criteria  story/task: required once state is past draft
+#   wsjf               epic/feature unless done/cancelled: business_value, time_criticality,
+#                      risk_reduction, job_size (Fibonacci; engine §7.2 computes the score)
+#   size_points        optional (story/task)
+#   depends_on         optional  list of item ids
+#   source             required on open items: where the to-do was raised ("<doc> §N" or conversation)
+#   notes              optional  human-facing summary
+#   impl_notes         optional  internal notes
+#   question, options, recommended, resolution   decisions (question required)
+#   date, commit       done items (date required)
+#
+# WSJF inputs and sizes below are initial estimates written during migration;
+# re-score them in PI planning.
+
+meta:
+  schema_version: 1
+  updated: "2026-09-27"
+  work_model: "agentco-core-engine-design.md §4"
+  states:
+    epic: [funnel, reviewing, analyzing, ready, implementing, done, cancelled]
+    work: [draft, needs_refinement, ready, in_progress, in_review, in_test, awaiting_human, blocked, done, cancelled]
+    decision: [draft, awaiting_human, done, cancelled]
+  board_lanes: [draft, needs_refinement, ready, in_progress, in_review, in_test, awaiting_human, blocked, done]
+  portfolio_lanes: [funnel, reviewing, analyzing, ready, implementing, done]
+  phases:
+    - { id: design,    title: "Design baseline" }
+    - { id: p0,        title: "Build phase 0 — simulation core" }
+    - { id: p1,        title: "Build phase 1 — one real worker" }
+    - { id: p2,        title: "Build phase 2 — the team" }
+    - { id: p3,        title: "Build phase 3 — the top" }
+    - { id: p4,        title: "Build phase 4 — governance enforced" }
+    - { id: p5,        title: "Build phase 5 — scale" }
+    - { id: console-a, title: "Console phase A — trusted core (human + Claude Code)" }
+    - { id: console-b, title: "Console phase B — handoff as Product 0" }
+    - { id: console-c, title: "Console phase C — company-driven" }
+    - { id: later,     title: "Beyond v0.1 scope" }
+  phase_notes: >-
+    Phase order follows agentco-core-engine-design.md §17 with one change made
+    during migration: egress controls (data-class ceilings, secret scanning) move
+    from phase 4 to phase 2, because phase 2 introduces the first remote tier
+    and governance design §5 requires them before any remote dispatch.
+
+products:
+  - id: agentco
+    title: "AgentCo platform"
+    kind: system
+    owner: human
+    notes: >-
+      Designed and bootstrapped by the human with Claude Code. Changes to it are
+      system changes (change/config design §1).
+  - id: console
+    title: "AgentCo Console"
+    kind: internal
+    owner: human
+    notes: >-
+      Product 0 (console design §8). Built by the human through phase A, then
+      owned and improved by AgentCo within its capacity share.
+
+groups:
+  - { id: design-docs,  title: "Design documents",       order: 10 }
+  - { id: decisions,    title: "Owner decisions",        order: 20 }
+  - { id: prompts,      title: "Agent prompts",          order: 30 }
+  - { id: evals,        title: "Evals & benchmarks",     order: 40 }
+  - { id: engine,       title: "Core engine",            order: 50 }
+  - { id: driver,       title: "Driver & routing",       order: 60 }
+  - { id: governance,   title: "Governance & compliance",order: 70 }
+  - { id: operations,   title: "Operations & continuity",order: 80 }
+  - { id: console-core, title: "Console — trusted core", order: 90 }
+  - { id: console-ui,   title: "Console — presentation", order: 100 }
+  - { id: future,       title: "Future scope",           order: 110 }
+
+items:
+
+# ════════════════════════════════════════════════════════════════════════════
+# DESIGN BASELINE v0.1 — shipped
+# ════════════════════════════════════════════════════════════════════════════
+
+  - id: epic-design-baseline-v01
+    kind: epic
+    nature: enabler
+    product: agentco
+    group: design-docs
+    phase: design
+    state: done
+    owner_role: bootstrap
+    title: "Design baseline v0.1"
+    date: "2026-09-27"
+    commit: 95b5fd5
+    notes: "Nine design documents, eight role prompts, and the company directive."
+
+  - id: feat-initial-design-docs
+    kind: feature
+    nature: enabler
+    parent: epic-design-baseline-v01
+    product: agentco
+    group: design-docs
+    phase: design
+    state: done
+    owner_role: bootstrap
+    title: "Escalation, data layer, and monitor designs plus role prompts"
+    date: "2026-09-27"
+    commit: 4bd8239
+
+  - id: feat-gov-change-service-docs
+    kind: feature
+    nature: enabler
+    parent: epic-design-baseline-v01
+    product: agentco
+    group: design-docs
+    phase: design
+    state: done
+    owner_role: bootstrap
+    title: "Governance, change/config, and service management designs"
+    date: "2026-09-27"
+    commit: a0e8703
+
+  - id: feat-core-engine-doc
+    kind: feature
+    nature: enabler
+    parent: epic-design-baseline-v01
+    product: agentco
+    group: design-docs
+    phase: design
+    state: done
+    owner_role: bootstrap
+    title: "Core business simulation engine design"
+    date: "2026-09-27"
+    commit: 1f74799
+
+  - id: feat-company-directive
+    kind: feature
+    nature: enabler
+    parent: epic-design-baseline-v01
+    product: agentco
+    group: prompts
+    phase: design
+    state: done
+    owner_role: bootstrap
+    title: "Company directive v1.1 included in every role prompt"
+    date: "2026-09-27"
+    commit: 171c737
+
+  - id: feat-monitor-v02-console-doc
+    kind: feature
+    nature: enabler
+    parent: epic-design-baseline-v01
+    product: agentco
+    group: design-docs
+    phase: design
+    state: done
+    owner_role: bootstrap
+    title: "Monitor/driver design v0.2 and console design"
+    date: "2026-09-27"
+    commit: 95b5fd5
+
+# ════════════════════════════════════════════════════════════════════════════
+# DESIGN SET v1.0 — make the documents consistent and complete
+# ════════════════════════════════════════════════════════════════════════════
+
+  - id: epic-design-consistency
+    kind: epic
+    nature: enabler
+    product: agentco
+    group: design-docs
+    phase: design
+    state: implementing
+    owner_role: bootstrap
+    title: "Design set v1.0: consistent, complete, cross-referenced"
+    description: >-
+      Apply every outstanding "changes required" entry, close or convert every
+      open question, and add the planned SAFe/PMO design, so that build phase 0
+      starts from a design set with no internal contradictions.
+    wsjf: { business_value: 13, time_criticality: 13, risk_reduction: 13, job_size: 8 }
+    source: ["conversation 2026-09-27"]
+
+  # ── Escalation design v0.2 ────────────────────────────────────────────────
+  - id: feat-escalation-doc-v02
+    kind: feature
+    nature: enabler
+    parent: epic-design-consistency
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Refactor escalation design to v0.2"
+    wsjf: { business_value: 8, time_criticality: 13, risk_reduction: 13, job_size: 5 }
+    source:
+      - "agentco-core-engine-design.md §18"
+      - "agentco-governance-policy.md §14"
+      - "agentco-change-config-mgmt-design.md §15"
+      - "agentco-service-management-design.md §17"
+      - "initial repo review 2026-09-27"
+
+  - id: story-esc-routing-context-fit
+    kind: story
+    nature: enabler
+    parent: feat-escalation-doc-v02
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Replace the token heuristic with context-fit routing; set tiers per job type"
+    size_points: 3
+    acceptance_criteria:
+      - "§6.2 selects models by the context-fit rule (core engine §6.2); inputs over 10K tokens no longer route to the 16K-context model"
+      - "§3 sets tiers per job type via org_chart.yaml; models.yaml keeps model definitions and routing rules only"
+      - "The models.yaml example gives client_communications an escalation_ladder"
+    source: ["agentco-core-engine-design.md §18", "initial repo review 2026-09-27 (routing bug, missing ladder)"]
+
+  - id: story-esc-worker-contract
+    kind: story
+    nature: enabler
+    parent: feat-escalation-doc-v02
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Worker contract v2: escalation.reason, and tier escalation vs. referral"
+    size_points: 3
+    acceptance_criteria:
+      - "§7 worker contract adds escalation {reason, question, blocking}"
+      - "§4.1 adds triggers rework_exhaustion and data_class_ceiling"
+      - "§4 distinguishes tier escalation (same job, stronger model) from referral (different role), pointing to core engine §9"
+      - "§4.1 states scope_violation is detected by the driver's files_touched check at commit time, not only by self-report"
+    source: ["agentco-core-engine-design.md §18", "agentco-change-config-mgmt-design.md §15"]
+
+  - id: story-esc-policy-controls
+    kind: story
+    nature: enabler
+    parent: feat-escalation-doc-v02
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Router policy checks: data-class ceiling, min_confidence, tools_allowed"
+    size_points: 2
+    acceptance_criteria:
+      - "§6: router compares prompt data class to the target tier's ceiling before dispatch (governance §5.2)"
+      - "min_confidence per role is sourced from risk_tolerance.yaml, replacing the single 0.6 default"
+      - "§3: every role has a tools_allowed list, deny by default"
+    source: ["agentco-governance-policy.md §14"]
+
+  - id: story-esc-audit-tuning
+    kind: story
+    nature: enabler
+    parent: feat-escalation-doc-v02
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Audit fields and tuning loop that proposes changes instead of making them"
+    size_points: 1
+    acceptance_criteria:
+      - "§8 audit entries carry controls, baseline_id, and hash-chain fields"
+      - "§8 tuning loop emits change proposals and never edits config directly (change/config §6)"
+    source: ["agentco-governance-policy.md §14", "agentco-change-config-mgmt-design.md §15"]
+
+  - id: story-esc-degraded-ops
+    kind: story
+    nature: enabler
+    parent: feat-escalation-doc-v02
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Degraded operation, alert channel, and CI scheduling slots"
+    size_points: 2
+    acceptance_criteria:
+      - "§6.6: local-down routing to T2 is conditional on data class and budget; circuit breakers per supplier"
+      - "§5: conversation vs. operational alerts distinction; T3 authority never fails over"
+      - "§6.3: CI jobs take slots in the local-resource scheduler"
+    source: ["agentco-service-management-design.md §17", "agentco-change-config-mgmt-design.md §15"]
+
+  - id: story-esc-consistency
+    kind: story
+    nature: enabler
+    parent: feat-escalation-doc-v02
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Naming fixes and open-question closure in the escalation design"
+    size_points: 1
+    acceptance_criteria:
+      - "project_memory renamed to canonical_records throughout"
+      - "§9 concurrency-ceiling question links to story-bench-concurrency-ceiling"
+      - "§9 daily_spend_limit marked resolved by governance §4 and core engine §13"
+      - "Version table added (v0.2)"
+    source: ["initial repo review 2026-09-27 (store naming)", "agentco-escalation-design.md §9"]
+
+  # ── Data layer design v0.2 ────────────────────────────────────────────────
+  - id: feat-data-layer-doc-v02
+    kind: feature
+    nature: enabler
+    parent: epic-design-consistency
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Refactor data layer design to v0.2"
+    wsjf: { business_value: 8, time_criticality: 8, risk_reduction: 13, job_size: 3 }
+    source:
+      - "agentco-governance-policy.md §14"
+      - "agentco-core-engine-design.md §18"
+      - "agentco-change-config-mgmt-design.md §15"
+      - "agentco-console-design.md §11"
+
+  - id: story-dl-envelope
+    kind: story
+    nature: enabler
+    parent: feat-data-layer-doc-v02
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Envelope v2: data class, bus-stamped sender, trace and baseline fields"
+    size_points: 2
+    acceptance_criteria:
+      - "§4 envelope gains data_class, derived from topic rather than declared by the sender"
+      - "from is stamped by the bus from the sandbox channel; sender-supplied values are ignored"
+      - "correlation_id and causation_id added"
+      - "baseline_id added; model-call records carry model_ci and prompt_ci"
+    source: ["agentco-governance-policy.md §14", "agentco-core-engine-design.md §18", "agentco-change-config-mgmt-design.md §15"]
+
+  - id: story-dl-topics
+    kind: story
+    nature: enabler
+    parent: feat-data-layer-doc-v02
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "need_to_know.yaml: topic classes and new topics"
+    size_points: 2
+    acceptance_criteria:
+      - "§5.1 gains topic_classes with default_class confidential (governance §5.1)"
+      - "Topics change.* and change.proposal.system added; the latter readable only by executive_director"
+      - "Client Communications may read metric aggregates and work-item projections (console §6.3)"
+    source: ["agentco-governance-policy.md §14", "agentco-change-config-mgmt-design.md §15", "agentco-console-design.md §11"]
+
+  - id: story-dl-fixes
+    kind: story
+    nature: enabler
+    parent: feat-data-layer-doc-v02
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Data layer wording fixes, store relationships, and open-question closure"
+    size_points: 1
+    acceptance_criteria:
+      - "§3 'exactly three tables' corrected (two per-agent tables plus working memory)"
+      - "Relationship to the engine event log and audit log stated (core engine §11.2)"
+      - "§10 cross-agent conflict ownership marked resolved: referral to the Architect (core engine §9)"
+      - "§10 sandbox mechanism links to dec-sandbox-mechanism; version table added"
+    source: ["initial repo review 2026-09-27", "agentco-data-layer-design.md §10"]
+
+  # ── Cross-document sync ───────────────────────────────────────────────────
+  - id: feat-crossdoc-sync
+    kind: feature
+    nature: enabler
+    parent: epic-design-consistency
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Apply outstanding cross-document changes to the newer design docs"
+    wsjf: { business_value: 5, time_criticality: 8, risk_reduction: 8, job_size: 5 }
+    source: ["agentco-console-design.md §11", "agentco-service-management-design.md §17", "agentco-company-directive.md §8"]
+
+  - id: story-sync-engine
+    kind: story
+    nature: enabler
+    parent: feat-crossdoc-sync
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Core engine design: console job types, human_request fields, service inputs"
+    size_points: 3
+    acceptance_criteria:
+      - "converse and maintain_dashboard job types; conversation work kind"
+      - "Per-product capacity shares; the Console registered as Product 0"
+      - "human_request gains urgency (engine-computed), deadline, default_on_expiry, impact_of_waiting"
+      - "provisional decisions and depends_on_provisional tagging"
+      - "service_mode and circuit-breaker state are scheduler inputs; model-affinity batching"
+    source: ["agentco-console-design.md §11", "agentco-service-management-design.md §17"]
+
+  - id: story-sync-governance
+    kind: story
+    nature: enabler
+    parent: feat-crossdoc-sync
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Governance design: console scope, expiry policy, service levels, directive links"
+    size_points: 2
+    acceptance_criteria:
+      - "Client Comms need-to-know includes metric aggregates; tools_allowed: [query_metric]"
+      - "Console usage data classified Internal"
+      - "risk_tolerance.yaml gains human_request_expiry; service_levels.yaml listed as a governance CI"
+      - "§3 policy set cites the directive as the behavioral statement of P-1, P-2, P-5, P-9"
+    source: ["agentco-console-design.md §11", "agentco-service-management-design.md §17", "agentco-company-directive.md §8"]
+
+  - id: story-sync-change-config
+    kind: story
+    nature: enabler
+    parent: feat-crossdoc-sync
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Change/config design: console CIs, UI gates, preview channel, directive suites"
+    size_points: 2
+    acceptance_criteria:
+      - "Console core is a system CI; the agentco-console repo is a product"
+      - "UI-specific CI gates and the preview/adopt/revert channel described"
+      - "§7: a directive change runs every role's eval suite"
+    source: ["agentco-console-design.md §11", "agentco-company-directive.md §8"]
+
+  - id: story-sync-service
+    kind: story
+    nature: enabler
+    parent: feat-crossdoc-sync
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Service management design: chat OLA, console SLO, feedback intake"
+    size_points: 1
+    acceptance_criteria:
+      - "§2.3 adds a chat reply OLA"
+      - "Console page-performance SLO added"
+      - "'Improve this page' listed as an intake channel"
+    source: ["agentco-console-design.md §11"]
+
+  - id: story-sync-monitor
+    kind: story
+    nature: enabler
+    parent: feat-crossdoc-sync
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Monitor design: mark protected core pages vs. presentation pages"
+    size_points: 1
+    acceptance_criteria:
+      - "§5 page catalog marks each view as protected core or presentation, pointing to console §5"
+    source: ["agentco-console-design.md §11"]
+
+  # ── SAFe / PMO design ─────────────────────────────────────────────────────
+  - id: feat-safe-pmo-doc
+    kind: feature
+    nature: enabler
+    parent: epic-design-consistency
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Write the SAFe / PMO delivery design"
+    wsjf: { business_value: 8, time_criticality: 5, risk_reduction: 8, job_size: 8 }
+    source: ["conversation 2026-09-27 (framework gap analysis)", "README.md (planned docs)"]
+
+  - id: story-safe-roles-cadence
+    kind: story
+    nature: enabler
+    parent: feat-safe-pmo-doc
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "SAFe roles, PI planning, System Demo, and Inspect & Adapt"
+    size_points: 3
+    acceptance_criteria:
+      - "Role mapping: RTE, Product Management vs. PO, System Architect, Business Owner, Epic Owner, System Team"
+      - "PI planning: PI objectives, program board with dependencies, ROAM risk handling"
+      - "System Demo and Inspect & Adapt fitted to the two cadences (core engine §10)"
+    source: ["conversation 2026-09-27 (framework gap analysis)"]
+
+  - id: story-safe-portfolio
+    kind: story
+    nature: enabler
+    parent: feat-safe-pmo-doc
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Portfolio: WSJF, portfolio Kanban, Lean budgets and business cases"
+    size_points: 3
+    acceptance_criteria:
+      - "WSJF definition matches core engine §7.2"
+      - "Portfolio Kanban states match meta.portfolio_lanes in roadmap.yaml"
+      - "Lean budget guardrails reconciled with core engine §13 and console §8.2"
+      - "Lean business case template for epics"
+    source: ["conversation 2026-09-27 (framework gap analysis)"]
+
+  - id: story-safe-metrics
+    kind: story
+    nature: enabler
+    parent: feat-safe-pmo-doc
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Flow and DORA metric definitions for the metric registry"
+    size_points: 2
+    acceptance_criteria:
+      - "Flow velocity, time, load, efficiency, distribution defined as registry entries (console §7.1)"
+      - "DORA metrics defined from change and release records (change/config §13)"
+    source: ["conversation 2026-09-27 (framework gap analysis)"]
+
+  - id: story-pmo-controls
+    kind: story
+    nature: enabler
+    parent: feat-safe-pmo-doc
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "PMO: RAID log, stage gates, status standard, document control, lessons learned"
+    size_points: 3
+    acceptance_criteria:
+      - "RAID log design (risks, assumptions, issues, dependencies), linked to risk acceptances (governance §4)"
+      - "Stage gates where the human approves a phase or release"
+      - "Status reporting standard reconciled with service management §11"
+      - "Document control and a lessons-learned repository"
+    source: ["conversation 2026-09-27 (framework gap analysis)"]
+
+  # ── Housekeeping ──────────────────────────────────────────────────────────
+  - id: feat-doc-housekeeping
+    kind: feature
+    nature: enabler
+    parent: epic-design-consistency
+    product: agentco
+    group: design-docs
+    phase: design
+    state: draft
+    owner_role: bootstrap
+    title: "Repository housekeeping"
+    wsjf: { business_value: 2, time_criticality: 1, risk_reduction: 2, job_size: 2 }
+    source: ["initial repo review 2026-09-27"]
+
+  - id: story-docs-folder
+    kind: story
+    nature: enabler
+    parent: feat-doc-housekeeping
+    product: agentco
+    group: design-docs
+    phase: design
+    state: draft
+    owner_role: bootstrap
+    title: "Move design documents into docs/ and fix links"
+    depends_on: [dec-docs-folder]
+    source: ["initial repo review 2026-09-27"]
+
+  - id: story-doc-control
+    kind: story
+    nature: enabler
+    parent: feat-doc-housekeeping
+    product: agentco
+    group: design-docs
+    phase: design
+    state: draft
+    owner_role: bootstrap
+    title: "Add revision tables to every design document"
+    depends_on: [story-pmo-controls]
+    source: ["conversation 2026-09-27 (PMO document control gap)"]
+
+# ════════════════════════════════════════════════════════════════════════════
+# ROLE PROMPTS v2
+# ════════════════════════════════════════════════════════════════════════════
+
+  - id: epic-prompts-v2
+    kind: epic
+    nature: enabler
+    product: agentco
+    group: prompts
+    phase: design
+    state: analyzing
+    owner_role: bootstrap
+    title: "Role prompts v2: aligned with the engine, governance, service, and console designs"
+    depends_on: [feat-escalation-doc-v02]
+    wsjf: { business_value: 8, time_criticality: 8, risk_reduction: 13, job_size: 5 }
+    source: ["agentco-core-engine-design.md §18", "agentco-governance-policy.md §14"]
+
+  - id: feat-prompts-contract
+    kind: feature
+    nature: enabler
+    parent: epic-prompts-v2
+    product: agentco
+    group: prompts
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Shared prompt contract: escalation reasons, thresholds, schemas"
+    wsjf: { business_value: 8, time_criticality: 8, risk_reduction: 13, job_size: 3 }
+    source: ["agentco-core-engine-design.md §18", "agentco-governance-policy.md §14"]
+
+  - id: story-prompts-escalation-reason
+    kind: story
+    nature: enabler
+    parent: feat-prompts-contract
+    product: agentco
+    group: prompts
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Emit escalation.reason instead of 'escalate to X' wording"
+    size_points: 3
+    depends_on: [story-esc-worker-contract]
+    acceptance_criteria:
+      - "Developer, Tester, Scrum Master, Architect, and PO templates emit escalation.reason from their role's enum"
+      - "No template names a destination role for tier escalation"
+    source: ["agentco-core-engine-design.md §18"]
+
+  - id: story-prompts-thresholds-untrusted
+    kind: story
+    nature: enabler
+    parent: feat-prompts-contract
+    product: agentco
+    group: prompts
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Render min_confidence from config; add the untrusted-content statement"
+    size_points: 2
+    acceptance_criteria:
+      - "All eight templates use {{ min_confidence }} instead of hard-coded numbers"
+      - "Each template states how labeled untrusted segments are handled (governance §7)"
+      - "All templates still render with the directive include"
+    source: ["agentco-governance-policy.md §14"]
+
+  - id: story-prompts-files-touched
+    kind: story
+    nature: enabler
+    parent: feat-prompts-contract
+    product: agentco
+    group: prompts
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Fix files_touched semantics for the Tester and Security Reviewer"
+    size_points: 1
+    acceptance_criteria:
+      - "Security Reviewer output has files_touched always empty, or the field is removed"
+      - "Tester files_touched is limited to test files it wrote, as stated in the template"
+    source: ["initial repo review 2026-09-27"]
+
+  - id: story-prompts-output-schemas
+    kind: story
+    nature: enabler
+    parent: feat-prompts-contract
+    product: agentco
+    group: prompts
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Publish a JSON output schema per role under schemas/"
+    size_points: 3
+    acceptance_criteria:
+      - "schemas/<role>.output.json exists for all eight roles, matching the template's REQUIRED OUTPUT FORMAT"
+      - "org_chart.yaml output_schema paths resolve (core engine §3.1)"
+    source: ["agentco-core-engine-design.md §3.1"]
+
+  - id: feat-prompts-new-modes
+    kind: feature
+    nature: enabler
+    parent: epic-prompts-v2
+    product: agentco
+    group: prompts
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "New prompt modes: decomposition, human-request framing, conversation"
+    wsjf: { business_value: 8, time_criticality: 5, risk_reduction: 8, job_size: 5 }
+    source: ["agentco-core-engine-design.md §18", "agentco-service-management-design.md §17", "agentco-console-design.md §11"]
+
+  - id: story-architect-decompose
+    kind: story
+    nature: enabler
+    parent: feat-prompts-new-modes
+    product: agentco
+    group: prompts
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Architect decompose_story template, including re-decompose mode"
+    size_points: 3
+    acceptance_criteria:
+      - "Outputs tasks with relevant_files, an acceptance-criteria subset, and dependencies"
+      - "Re-decompose mode accepts the engine's bounds-rejection details"
+    source: ["agentco-core-engine-design.md §18"]
+
+  - id: story-cc-human-request
+    kind: story
+    nature: enabler
+    parent: feat-prompts-new-modes
+    product: agentco
+    group: prompts
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Client Comms: human_request framing fields and a sourced PI report"
+    size_points: 2
+    acceptance_criteria:
+      - "human_escalation_framing emits the service management §3.2 fields"
+      - "PI report mode uses only the projections provided to it"
+    source: ["agentco-service-management-design.md §17"]
+
+  - id: story-cc-converse
+    kind: story
+    nature: enabler
+    parent: feat-prompts-new-modes
+    product: agentco
+    group: prompts
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Client Comms: converse mode, metric citations, chat is not a command channel"
+    size_points: 2
+    acceptance_criteria:
+      - "converse mode uses query_metric and cites metric ids for every figure"
+      - "Requests to approve or deploy via chat are answered with a link to the approval"
+    source: ["agentco-console-design.md §11"]
+
+  - id: feat-prompts-dedupe
+    kind: feature
+    nature: enabler
+    parent: epic-prompts-v2
+    product: agentco
+    group: prompts
+    phase: p1
+    state: draft
+    owner_role: bootstrap
+    title: "Remove role-prompt text now duplicated by the directive"
+    depends_on: [story-evals-directive]
+    wsjf: { business_value: 2, time_criticality: 1, risk_reduction: 1, job_size: 2 }
+    notes: "Saves ~100–200 tokens per prompt. Only after directive evals show it carries the shared rules."
+    source: ["agentco-company-directive.md §8", "agentco-company-directive.md §9"]
+
+# ════════════════════════════════════════════════════════════════════════════
+# EVALS & BENCHMARKS
+# ════════════════════════════════════════════════════════════════════════════
+
+  - id: epic-evals-bench
+    kind: epic
+    nature: enabler
+    product: agentco
+    group: evals
+    phase: p1
+    state: analyzing
+    owner_role: bootstrap
+    title: "Evaluation and benchmark harness"
+    wsjf: { business_value: 8, time_criticality: 8, risk_reduction: 13, job_size: 8 }
+    source: ["agentco-change-config-mgmt-design.md §7", "agentco-service-management-design.md §7.2"]
+
+  - id: feat-golden-evals
+    kind: feature
+    nature: enabler
+    parent: epic-evals-bench
+    product: agentco
+    group: evals
+    phase: p1
+    state: draft
+    owner_role: bootstrap
+    title: "Golden eval suites and the eval runner"
+    wsjf: { business_value: 8, time_criticality: 8, risk_reduction: 13, job_size: 8 }
+    source: ["agentco-change-config-mgmt-design.md §7"]
+
+  - id: story-evals-runner
+    kind: story
+    nature: enabler
+    parent: feat-golden-evals
+    product: agentco
+    group: evals
+    phase: p1
+    state: draft
+    owner_role: bootstrap
+    title: "Eval runner: k runs per case, pass-rate scoring, baseline comparison"
+    source: ["agentco-change-config-mgmt-design.md §7.2"]
+
+  - id: story-evals-role-suites
+    kind: story
+    nature: enabler
+    parent: feat-golden-evals
+    product: agentco
+    group: evals
+    phase: p1
+    state: draft
+    owner_role: bootstrap
+    title: "Golden suites for all eight roles"
+    depends_on: [story-evals-runner, story-prompts-output-schemas]
+    source: ["agentco-change-config-mgmt-design.md §7.1"]
+
+  - id: story-evals-size-calibration
+    kind: story
+    nature: enabler
+    parent: feat-golden-evals
+    product: agentco
+    group: evals
+    phase: p1
+    state: draft
+    owner_role: bootstrap
+    title: "Calibrate suite size and runs per case for stable pass rates"
+    depends_on: [story-evals-role-suites]
+    notes: "Start at ~20 cases × 5 runs per role and adjust."
+    source: ["agentco-change-config-mgmt-design.md §16"]
+
+  - id: story-evals-directive
+    kind: story
+    nature: enabler
+    parent: feat-golden-evals
+    product: agentco
+    group: evals
+    phase: p1
+    state: draft
+    owner_role: bootstrap
+    title: "Directive eval cases, compared with and without the directive per tier"
+    depends_on: [story-evals-runner]
+    source: ["agentco-company-directive.md §7.1", "agentco-company-directive.md §9"]
+
+  - id: story-evals-injection
+    kind: story
+    nature: enabler
+    parent: feat-golden-evals
+    product: agentco
+    group: evals
+    phase: p1
+    state: draft
+    owner_role: bootstrap
+    title: "Injection suite measuring provenance labeling on local models"
+    depends_on: [story-evals-runner]
+    source: ["agentco-governance-policy.md §7", "agentco-governance-policy.md §15"]
+
+  - id: feat-bench-harness
+    kind: feature
+    nature: enabler
+    parent: epic-evals-bench
+    product: agentco
+    group: evals
+    phase: p1
+    state: draft
+    owner_role: bootstrap
+    title: "Local inference benchmark harness"
+    wsjf: { business_value: 5, time_criticality: 8, risk_reduction: 8, job_size: 3 }
+    source: ["agentco-service-management-design.md §7.2"]
+
+  - id: story-bench-local-models
+    kind: story
+    nature: enabler
+    parent: feat-bench-harness
+    product: agentco
+    group: evals
+    phase: p1
+    state: draft
+    owner_role: bootstrap
+    title: "Benchmark each model and flag set: tok/s, TTFT, concurrency 1–3, cold and warm"
+    source: ["agentco-service-management-design.md §7.2"]
+
+  - id: story-bench-concurrency-ceiling
+    kind: story
+    nature: enabler
+    parent: feat-bench-harness
+    product: agentco
+    group: evals
+    phase: p1
+    state: draft
+    owner_role: bootstrap
+    title: "Set the GPU semaphore and local_queue_overflow from measurements"
+    depends_on: [story-bench-local-models]
+    source: ["agentco-escalation-design.md §9", "agentco-service-management-design.md §7.2"]
+
+  - id: story-bench-ci-cpu
+    kind: story
+    nature: enabler
+    parent: feat-bench-harness
+    product: agentco
+    group: evals
+    phase: p1
+    state: draft
+    owner_role: bootstrap
+    title: "Measure CI CPU contention with CPU-offloaded inference"
+    depends_on: [story-bench-local-models]
+    source: ["agentco-change-config-mgmt-design.md §16"]
+
+  - id: feat-supplier-canaries
+    kind: feature
+    nature: enabler
+    parent: epic-evals-bench
+    product: agentco
+    group: evals
+    phase: p4
+    state: draft
+    owner_role: bootstrap
+    title: "Daily canary evals for T2/T3 drift detection"
+    depends_on: [feat-golden-evals]
+    wsjf: { business_value: 3, time_criticality: 2, risk_reduction: 8, job_size: 3 }
+    source: ["agentco-change-config-mgmt-design.md §3.3"]
+
+# ════════════════════════════════════════════════════════════════════════════
+# BUILD PHASES (core engine design §17)
+# ════════════════════════════════════════════════════════════════════════════
+
+  # ── Phase 0 ───────────────────────────────────────────────────────────────
+  - id: epic-build-p0
+    kind: epic
+    nature: enabler
+    product: agentco
+    group: engine
+    phase: p0
+    state: analyzing
+    owner_role: bootstrap
+    title: "Build phase 0: simulation core"
+    depends_on: [epic-design-consistency]
+    description: "Engine core, event store, workflow, scheduler, sim adapters, and a CLI to run a simulated backlog, with no model calls."
+    wsjf: { business_value: 13, time_criticality: 8, risk_reduction: 13, job_size: 13 }
+    source: ["agentco-core-engine-design.md §17"]
+
+  - id: feat-p0-config
+    kind: feature
+    nature: enabler
+    parent: epic-build-p0
+    product: agentco
+    group: engine
+    phase: p0
+    state: draft
+    owner_role: bootstrap
+    title: "Config schemas and loader, including the context-fit check"
+    wsjf: { business_value: 8, time_criticality: 8, risk_reduction: 8, job_size: 5 }
+    description: "org_chart, workflow, task_bounds, agile, models, need_to_know, risk_tolerance, service_levels; refuse to start on a bound that can't fit."
+    source: ["agentco-core-engine-design.md §3", "agentco-core-engine-design.md §6.2", "agentco-governance-policy.md §4"]
+
+  - id: feat-p0-engine-core
+    kind: feature
+    nature: enabler
+    parent: epic-build-p0
+    product: agentco
+    group: engine
+    phase: p0
+    state: draft
+    owner_role: bootstrap
+    title: "Engine core: work model, workflow FSMs, scheduler, effects, escalation, ledger"
+    depends_on: [feat-p0-config]
+    wsjf: { business_value: 13, time_criticality: 8, risk_reduction: 8, job_size: 13 }
+    source: ["agentco-core-engine-design.md §4–§9", "agentco-core-engine-design.md §13"]
+
+  - id: feat-p0-event-store
+    kind: feature
+    nature: enabler
+    parent: epic-build-p0
+    product: agentco
+    group: engine
+    phase: p0
+    state: draft
+    owner_role: bootstrap
+    title: "Event store, projections, snapshots, and replay"
+    wsjf: { business_value: 8, time_criticality: 8, risk_reduction: 8, job_size: 8 }
+    source: ["agentco-core-engine-design.md §11"]
+
+  - id: feat-p0-sim
+    kind: feature
+    nature: enabler
+    parent: epic-build-p0
+    product: agentco
+    group: engine
+    phase: p0
+    state: draft
+    owner_role: bootstrap
+    title: "Simulation adapters, behavior-model priors, and a CLI"
+    depends_on: [feat-p0-engine-core, feat-p0-event-store]
+    wsjf: { business_value: 8, time_criticality: 5, risk_reduction: 8, job_size: 8 }
+    source: ["agentco-core-engine-design.md §12", "agentco-core-engine-design.md §17"]
+
+  - id: feat-p0-seed-import
+    kind: feature
+    nature: enabler
+    parent: epic-build-p0
+    product: agentco
+    group: engine
+    phase: p0
+    state: draft
+    owner_role: bootstrap
+    title: "Import roadmap.yaml into the engine as seed events"
+    depends_on: [feat-p0-event-store]
+    wsjf: { business_value: 5, time_criticality: 5, risk_reduction: 3, job_size: 2 }
+    description: "After import, the engine is the system of record and roadmap.yaml becomes a generated export."
+    source: ["roadmap.yaml header (this migration)"]
+
+  - id: feat-p0-repo-ci
+    kind: feature
+    nature: enabler
+    parent: epic-build-p0
+    product: agentco
+    group: engine
+    phase: p0
+    state: draft
+    owner_role: bootstrap
+    title: "CI for the AgentCo repo: config, template, schema, roadmap, and sim checks"
+    wsjf: { business_value: 5, time_criticality: 5, risk_reduction: 8, job_size: 3 }
+    description: "YAML schema validation, Jinja render check, JSON schema checks, roadmap-lint, simulated deadlock/starvation tests."
+    source: ["agentco-change-config-mgmt-design.md §10", "agentco-core-engine-design.md §12.2"]
+
+  # ── Phase 1 ───────────────────────────────────────────────────────────────
+  - id: epic-build-p1
+    kind: epic
+    nature: enabler
+    product: agentco
+    group: driver
+    phase: p1
+    state: funnel
+    owner_role: bootstrap
+    title: "Build phase 1: one real worker"
+    depends_on: [epic-build-p0]
+    wsjf: { business_value: 13, time_criticality: 5, risk_reduction: 8, job_size: 13 }
+    source: ["agentco-core-engine-design.md §17"]
+
+  - id: feat-p1-router-t0
+    kind: feature
+    nature: enabler
+    parent: epic-build-p1
+    product: agentco
+    group: driver
+    phase: p1
+    state: draft
+    owner_role: bootstrap
+    title: "Router with a T0 llama.cpp adapter and context-fit model selection"
+    wsjf: { business_value: 8, time_criticality: 5, risk_reduction: 5, job_size: 5 }
+    source: ["agentco-escalation-design.md §6", "agentco-core-engine-design.md §6.2"]
+
+  - id: story-model-cards-local
+    kind: story
+    nature: enabler
+    parent: feat-p1-router-t0
+    product: agentco
+    group: governance
+    phase: p1
+    state: draft
+    owner_role: bootstrap
+    title: "Model inventory and model cards for the three local models"
+    source: ["agentco-governance-policy.md §8.1"]
+
+  - id: feat-p1-sandboxes
+    kind: feature
+    nature: enabler
+    parent: epic-build-p1
+    product: agentco
+    group: driver
+    phase: p1
+    state: draft
+    owner_role: bootstrap
+    title: "Sandbox runtime with Developer and Tester sandboxes"
+    depends_on: [dec-sandbox-mechanism]
+    wsjf: { business_value: 8, time_criticality: 5, risk_reduction: 8, job_size: 8 }
+    source: ["agentco-data-layer-design.md §10", "agentco-monitor-driver-design.md §4.2"]
+
+  - id: feat-p1-driver-commits
+    kind: feature
+    nature: enabler
+    parent: epic-build-p1
+    product: agentco
+    group: driver
+    phase: p1
+    state: draft
+    owner_role: bootstrap
+    title: "Driver as sole committer with scope check, plus local CI on a toy repo"
+    wsjf: { business_value: 8, time_criticality: 5, risk_reduction: 8, job_size: 5 }
+    source: ["agentco-change-config-mgmt-design.md §8"]
+
+  - id: feat-p1-ledger-audit
+    kind: feature
+    nature: enabler
+    parent: epic-build-p1
+    product: agentco
+    group: driver
+    phase: p1
+    state: draft
+    owner_role: bootstrap
+    title: "Cost ledger and a basic audit log"
+    wsjf: { business_value: 5, time_criticality: 5, risk_reduction: 5, job_size: 3 }
+    source: ["agentco-core-engine-design.md §13", "agentco-escalation-design.md §8"]
+
+  # ── Phase 2 ───────────────────────────────────────────────────────────────
+  - id: epic-build-p2
+    kind: epic
+    nature: enabler
+    product: agentco
+    group: driver
+    phase: p2
+    state: funnel
+    owner_role: bootstrap
+    title: "Build phase 2: the team"
+    depends_on: [epic-build-p1]
+    wsjf: { business_value: 13, time_criticality: 3, risk_reduction: 8, job_size: 13 }
+    source: ["agentco-core-engine-design.md §17"]
+
+  - id: feat-p2-egress-controls
+    kind: feature
+    nature: enabler
+    parent: epic-build-p2
+    product: agentco
+    group: governance
+    phase: p2
+    state: draft
+    owner_role: bootstrap
+    title: "Egress controls before the first remote tier: data-class ceilings, secret scanning"
+    wsjf: { business_value: 5, time_criticality: 8, risk_reduction: 13, job_size: 5 }
+    notes: "Moved from phase 4 during migration; see meta.phase_notes."
+    source: ["agentco-governance-policy.md §5"]
+
+  - id: feat-p2-supplier-t2
+    kind: feature
+    nature: enabler
+    parent: epic-build-p2
+    product: agentco
+    group: governance
+    phase: p2
+    state: draft
+    owner_role: bootstrap
+    title: "DeepSeek/OpenCode supplier assessment and the T2 adapter"
+    depends_on: [feat-p2-egress-controls]
+    wsjf: { business_value: 8, time_criticality: 5, risk_reduction: 8, job_size: 5 }
+    source: ["agentco-governance-policy.md §8.2", "agentco-governance-policy.md §15"]
+
+  - id: story-supplier-deepseek
+    kind: story
+    nature: enabler
+    parent: feat-p2-supplier-t2
+    product: agentco
+    group: governance
+    phase: p2
+    state: draft
+    owner_role: human
+    title: "Assess DeepSeek-V4-pro and OpenCode: retention, training use, jurisdiction, limits"
+    source: ["agentco-governance-policy.md §8.2"]
+
+  - id: feat-p2-roles
+    kind: feature
+    nature: enabler
+    parent: epic-build-p2
+    product: agentco
+    group: engine
+    phase: p2
+    state: draft
+    owner_role: bootstrap
+    title: "Product Owner, Architect, and Security Reviewer with deterministic scanners"
+    wsjf: { business_value: 13, time_criticality: 3, risk_reduction: 8, job_size: 8 }
+    source: ["agentco-core-engine-design.md §17", "agentco-governance-policy.md §9"]
+
+  - id: feat-p2-broker
+    kind: feature
+    nature: enabler
+    parent: epic-build-p2
+    product: agentco
+    group: engine
+    phase: p2
+    state: draft
+    owner_role: bootstrap
+    title: "Broker ACLs, topic classes, bus-stamped identity, and referrals"
+    depends_on: [feat-data-layer-doc-v02]
+    wsjf: { business_value: 8, time_criticality: 3, risk_reduction: 13, job_size: 8 }
+    source: ["agentco-data-layer-design.md §5", "agentco-governance-policy.md §6.1", "agentco-core-engine-design.md §9"]
+
+  - id: story-calibrate-slos
+    kind: story
+    nature: enabler
+    parent: feat-p2-roles
+    product: agentco
+    group: operations
+    phase: p2
+    state: draft
+    owner_role: bootstrap
+    title: "Recalibrate OLA/SLO defaults from phase 1–2 data"
+    depends_on: [feat-p1-ledger-audit]
+    source: ["agentco-service-management-design.md §18"]
+
+  - id: story-watch-decomposition
+    kind: story
+    nature: enabler
+    parent: feat-p2-roles
+    product: agentco
+    group: engine
+    phase: p2
+    state: draft
+    owner_role: bootstrap
+    title: "Measure whether story decomposition is a bottleneck (tech_lead role?)"
+    source: ["agentco-core-engine-design.md §19"]
+
+  # ── Phase 3 ───────────────────────────────────────────────────────────────
+  - id: epic-build-p3
+    kind: epic
+    nature: enabler
+    product: agentco
+    group: driver
+    phase: p3
+    state: funnel
+    owner_role: bootstrap
+    title: "Build phase 3: the top of the company and the human loop"
+    depends_on: [epic-build-p2]
+    wsjf: { business_value: 13, time_criticality: 3, risk_reduction: 8, job_size: 13 }
+    source: ["agentco-core-engine-design.md §17"]
+
+  - id: feat-p3-t3
+    kind: feature
+    nature: enabler
+    parent: epic-build-p3
+    product: agentco
+    group: driver
+    phase: p3
+    state: draft
+    owner_role: bootstrap
+    title: "Anthropic supplier assessment, T3 adapter, Exec Director and Client Comms"
+    wsjf: { business_value: 13, time_criticality: 3, risk_reduction: 8, job_size: 8 }
+    source: ["agentco-governance-policy.md §5.2", "agentco-core-engine-design.md §17"]
+
+  - id: story-supplier-anthropic
+    kind: story
+    nature: enabler
+    parent: feat-p3-t3
+    product: agentco
+    group: governance
+    phase: p3
+    state: draft
+    owner_role: human
+    title: "Assess Anthropic as a supplier (required before T3 handles Confidential data)"
+    source: ["agentco-governance-policy.md §5.2", "agentco-governance-policy.md §8.2"]
+
+  - id: feat-p3-human-loop
+    kind: feature
+    nature: enabler
+    parent: epic-build-p3
+    product: agentco
+    group: engine
+    phase: p3
+    state: draft
+    owner_role: bootstrap
+    title: "Human relay and the human_request lifecycle: urgency, reminders, expiry"
+    depends_on: [story-sync-engine]
+    wsjf: { business_value: 13, time_criticality: 3, risk_reduction: 8, job_size: 5 }
+    source: ["agentco-service-management-design.md §3", "agentco-monitor-driver-design.md §6"]
+
+  - id: feat-p3-alerts
+    kind: feature
+    nature: enabler
+    parent: epic-build-p3
+    product: agentco
+    group: operations
+    phase: p3
+    state: draft
+    owner_role: bootstrap
+    title: "Operational alerts, notification adapter, daily digest, external watchdog"
+    depends_on: [dec-notification-channel]
+    wsjf: { business_value: 8, time_criticality: 3, risk_reduction: 8, job_size: 5 }
+    source: ["agentco-monitor-driver-design.md §4.8", "agentco-service-management-design.md §6"]
+
+  - id: feat-p3-multiproduct
+    kind: feature
+    nature: enabler
+    parent: epic-build-p3
+    product: agentco
+    group: engine
+    phase: p3
+    state: draft
+    owner_role: bootstrap
+    title: "Multi-product portfolio with per-product capacity shares"
+    wsjf: { business_value: 8, time_criticality: 3, risk_reduction: 5, job_size: 5 }
+    notes: "Needed before the Console handoff (console phase B)."
+    source: ["agentco-core-engine-design.md §19", "agentco-console-design.md §8.2"]
+
+  # ── Phase 4 ───────────────────────────────────────────────────────────────
+  - id: epic-build-p4
+    kind: epic
+    nature: enabler
+    product: agentco
+    group: governance
+    phase: p4
+    state: funnel
+    owner_role: bootstrap
+    title: "Build phase 4: governance enforced"
+    depends_on: [epic-build-p3]
+    wsjf: { business_value: 8, time_criticality: 3, risk_reduction: 13, job_size: 13 }
+    source: ["agentco-core-engine-design.md §17"]
+
+  - id: feat-p4-baselines
+    kind: feature
+    nature: enabler
+    parent: epic-build-p4
+    product: agentco
+    group: governance
+    phase: p4
+    state: draft
+    owner_role: bootstrap
+    title: "Baselines, drift detection, change records, and the self-modification rule"
+    wsjf: { business_value: 8, time_criticality: 3, risk_reduction: 13, job_size: 8 }
+    source: ["agentco-change-config-mgmt-design.md §2–§6"]
+
+  - id: feat-p4-eval-gate
+    kind: feature
+    nature: enabler
+    parent: epic-build-p4
+    product: agentco
+    group: evals
+    phase: p4
+    state: draft
+    owner_role: bootstrap
+    title: "Eval gate and canary rollout for prompt and model changes"
+    depends_on: [feat-golden-evals]
+    wsjf: { business_value: 8, time_criticality: 3, risk_reduction: 13, job_size: 5 }
+    source: ["agentco-change-config-mgmt-design.md §7"]
+
+  - id: feat-p4-audit-chain
+    kind: feature
+    nature: enabler
+    parent: epic-build-p4
+    product: agentco
+    group: governance
+    phase: p4
+    state: draft
+    owner_role: bootstrap
+    title: "Audit hash chain, control tagging, and compliance evidence"
+    wsjf: { business_value: 5, time_criticality: 3, risk_reduction: 13, job_size: 5 }
+    source: ["agentco-governance-policy.md §12"]
+
+  - id: feat-p4-continuity
+    kind: feature
+    nature: enabler
+    parent: epic-build-p4
+    product: agentco
+    group: operations
+    phase: p4
+    state: draft
+    owner_role: bootstrap
+    title: "Backups, restore drills, circuit breakers, degraded modes, runbooks"
+    depends_on: [dec-offsite-backup, dec-data-at-rest]
+    wsjf: { business_value: 5, time_criticality: 3, risk_reduction: 13, job_size: 8 }
+    source: ["agentco-service-management-design.md §4", "agentco-service-management-design.md §8", "agentco-service-management-design.md §12"]
+
+  # ── Phase 5 ───────────────────────────────────────────────────────────────
+  - id: epic-build-p5
+    kind: epic
+    nature: enabler
+    product: agentco
+    group: engine
+    phase: p5
+    state: funnel
+    owner_role: bootstrap
+    title: "Build phase 5: scale"
+    depends_on: [epic-build-p4]
+    wsjf: { business_value: 8, time_criticality: 1, risk_reduction: 5, job_size: 13 }
+    source: ["agentco-core-engine-design.md §17"]
+
+  - id: feat-p5-cadence
+    kind: feature
+    nature: enabler
+    parent: epic-build-p5
+    product: agentco
+    group: engine
+    phase: p5
+    state: draft
+    owner_role: bootstrap
+    title: "PI cadence and multi-instance roles"
+    wsjf: { business_value: 5, time_criticality: 1, risk_reduction: 3, job_size: 5 }
+    source: ["agentco-core-engine-design.md §10", "agentco-core-engine-design.md §17"]
+
+  - id: feat-p5-forecasting
+    kind: feature
+    nature: enabler
+    parent: epic-build-p5
+    product: agentco
+    group: engine
+    phase: p5
+    state: draft
+    owner_role: bootstrap
+    title: "Calibrated forecasts with hierarchical behavior models"
+    wsjf: { business_value: 5, time_criticality: 1, risk_reduction: 3, job_size: 8 }
+    source: ["agentco-core-engine-design.md §12.3", "agentco-core-engine-design.md §19"]
+
+  - id: feat-p5-memory
+    kind: feature
+    nature: enabler
+    parent: epic-build-p5
+    product: agentco
+    group: engine
+    phase: p5
+    state: draft
+    owner_role: bootstrap
+    title: "Agent memory at scale: note compaction and a retrieval benchmark"
+    wsjf: { business_value: 3, time_criticality: 1, risk_reduction: 3, job_size: 5 }
+    description: "Retention policy for superseded semantic_notes chains; benchmark topic-prefix filtering before adding embeddings."
+    source: ["agentco-data-layer-design.md §10"]
+
+# ════════════════════════════════════════════════════════════════════════════
+# CONSOLE (Product 0)
+# ════════════════════════════════════════════════════════════════════════════
+
+  - id: epic-console-a
+    kind: epic
+    nature: business
+    product: console
+    group: console-core
+    phase: console-a
+    state: reviewing
+    owner_role: bootstrap
+    title: "Console phase A: trusted core and minimal UI"
+    wsjf: { business_value: 13, time_criticality: 8, risk_reduction: 8, job_size: 13 }
+    source: ["agentco-console-design.md §8.6"]
+
+  - id: feat-ca-shell
+    kind: feature
+    nature: enabler
+    parent: epic-console-a
+    product: console
+    group: console-core
+    phase: console-a
+    state: ready
+    owner_role: bootstrap
+    title: "Vendor the NWN workspace shell and design tokens"
+    wsjf: { business_value: 5, time_criticality: 8, risk_reduction: 3, job_size: 2 }
+    source: ["agentco-console-design.md §2"]
+
+  - id: story-ca-vendor-shell
+    kind: story
+    nature: enabler
+    parent: feat-ca-shell
+    product: console
+    group: console-core
+    phase: console-a
+    state: ready
+    owner_role: bootstrap
+    title: "Copy shell CSS/JS into console/core/shell with UPSTREAM.md"
+    size_points: 2
+    acceptance_criteria:
+      - "Tokens from console design §2.2, including the AgentCo additions"
+      - "Navigator, tab bar, detached panes, filter-bar state, navigation history client"
+      - "UPSTREAM.md records nwn-homers-lotr@32732964f53"
+    source: ["agentco-console-design.md §2.3"]
+
+  - id: feat-ca-roadmap-board
+    kind: feature
+    nature: business
+    parent: epic-console-a
+    product: console
+    group: console-ui
+    phase: console-a
+    state: ready
+    owner_role: bootstrap
+    title: "Backlog board, list, and portfolio lanes over roadmap.yaml (pre-engine)"
+    depends_on: [feat-ca-shell]
+    wsjf: { business_value: 8, time_criticality: 8, risk_reduction: 3, job_size: 3 }
+    description: >-
+      The first useful console page, available before the engine exists: read
+      roadmap.yaml, render board_lanes and portfolio_lanes, filters, deep links
+      (/#item-<id>), decision items styled as inbox entries. Read-only.
+    source: ["roadmap.yaml header (this migration)", "agentco-console-design.md §5"]
+
+  - id: story-ca-board-view
+    kind: story
+    nature: business
+    parent: feat-ca-roadmap-board
+    product: console
+    group: console-ui
+    phase: console-a
+    state: ready
+    owner_role: bootstrap
+    title: "Board and list tabs with lanes from meta.board_lanes"
+    size_points: 3
+    acceptance_criteria:
+      - "Cards show kind, product, phase, tier-colored left bar (owner_role), and a WSJF score"
+      - "Filters: product, group, phase, kind, state, owner, free text; state persisted like NWN FILTERS"
+      - "Clicking a card opens an item tab showing description, acceptance criteria, sources, and dependencies"
+    source: ["agentco-console-design.md §2.1", "agentco-console-design.md §5"]
+
+  - id: story-ca-portfolio-view
+    kind: story
+    nature: business
+    parent: feat-ca-roadmap-board
+    product: console
+    group: console-ui
+    phase: console-a
+    state: ready
+    owner_role: bootstrap
+    title: "Portfolio Kanban of epics from meta.portfolio_lanes"
+    size_points: 2
+    acceptance_criteria:
+      - "Epics by portfolio state and product, each showing child progress x/y done"
+      - "WSJF score computed as (business_value + time_criticality + risk_reduction) / job_size"
+    source: ["agentco-console-design.md §5.1"]
+
+  - id: story-ca-decisions-view
+    kind: story
+    nature: business
+    parent: feat-ca-roadmap-board
+    product: console
+    group: console-ui
+    phase: console-a
+    state: ready
+    owner_role: bootstrap
+    title: "Open decisions view: question, options, recommendation, what each blocks"
+    size_points: 2
+    acceptance_criteria:
+      - "Lists decision items in awaiting_human first, with the items that depend on each"
+      - "Read-only until the command API exists; the answer is recorded by editing roadmap.yaml"
+    source: ["agentco-monitor-driver-design.md §5.5"]
+
+  - id: feat-ca-core-api
+    kind: feature
+    nature: enabler
+    parent: epic-console-a
+    product: console
+    group: console-core
+    phase: console-a
+    state: draft
+    owner_role: bootstrap
+    title: "Core API: auth, roles and capabilities, users CLI, read API, metric registry"
+    depends_on: [dec-session-mechanism]
+    wsjf: { business_value: 8, time_criticality: 5, risk_reduction: 13, job_size: 8 }
+    source: ["agentco-console-design.md §3", "agentco-console-design.md §4", "agentco-console-design.md §7.1"]
+
+  - id: feat-ca-commands
+    kind: feature
+    nature: enabler
+    parent: epic-console-a
+    product: console
+    group: console-core
+    phase: console-a
+    state: draft
+    owner_role: bootstrap
+    title: "Command API with the trusted confirmation dialog and nonces"
+    depends_on: [feat-ca-core-api]
+    wsjf: { business_value: 8, time_criticality: 3, risk_reduction: 13, job_size: 5 }
+    source: ["agentco-console-design.md §3.3"]
+
+  - id: feat-ca-sandbox
+    kind: feature
+    nature: enabler
+    parent: epic-console-a
+    product: console
+    group: console-core
+    phase: console-a
+    state: draft
+    owner_role: bootstrap
+    title: "Sandboxed presentation origin and postMessage bridge"
+    depends_on: [feat-ca-core-api]
+    wsjf: { business_value: 5, time_criticality: 3, risk_reduction: 13, job_size: 5 }
+    source: ["agentco-console-design.md §3.2"]
+
+  - id: story-ca-chart-spike
+    kind: story
+    nature: enabler
+    parent: feat-ca-sandbox
+    product: console
+    group: console-ui
+    phase: console-a
+    state: draft
+    owner_role: bootstrap
+    title: "Spike: choose the chart library and where its wrappers live"
+    source: ["agentco-console-design.md §9.2", "agentco-console-design.md §12"]
+
+  - id: feat-ca-protected-pages
+    kind: feature
+    nature: business
+    parent: epic-console-a
+    product: console
+    group: console-core
+    phase: console-a
+    state: draft
+    owner_role: bootstrap
+    title: "Protected pages: banner, inbox, decision log, approvals, scorecard, settings"
+    depends_on: [feat-ca-commands]
+    wsjf: { business_value: 13, time_criticality: 3, risk_reduction: 13, job_size: 8 }
+    source: ["agentco-console-design.md §3.4"]
+
+  - id: feat-ca-min-ui
+    kind: feature
+    nature: business
+    parent: epic-console-a
+    product: console
+    group: console-ui
+    phase: console-a
+    state: draft
+    owner_role: bootstrap
+    title: "Minimal presentation: overview, engine-backed boards, chat"
+    depends_on: [feat-ca-sandbox, feat-p3-t3]
+    wsjf: { business_value: 13, time_criticality: 3, risk_reduction: 5, job_size: 8 }
+    source: ["agentco-console-design.md §8.6"]
+
+  - id: feat-ca-remote
+    kind: feature
+    nature: business
+    parent: epic-console-a
+    product: console
+    group: console-core
+    phase: console-a
+    state: draft
+    owner_role: bootstrap
+    title: "Remote and mobile access via Cloudflare Tunnel"
+    depends_on: [dec-session-mechanism, feat-ca-core-api]
+    wsjf: { business_value: 5, time_criticality: 2, risk_reduction: 5, job_size: 3 }
+    source: ["agentco-console-design.md §9.1", "agentco-monitor-driver-design.md §13"]
+
+  - id: epic-console-b
+    kind: epic
+    nature: enabler
+    product: console
+    group: console-core
+    phase: console-b
+    state: funnel
+    owner_role: bootstrap
+    title: "Console phase B: hand the presentation layer to AgentCo as Product 0"
+    depends_on: [epic-console-a, feat-p3-multiproduct]
+    wsjf: { business_value: 8, time_criticality: 2, risk_reduction: 5, job_size: 5 }
+    source: ["agentco-console-design.md §8.6"]
+
+  - id: feat-cb-repo
+    kind: feature
+    nature: enabler
+    parent: epic-console-b
+    product: console
+    group: console-core
+    phase: console-b
+    state: draft
+    owner_role: bootstrap
+    title: "Create agentco-console repo; register Product 0 with vision and capacity share"
+    depends_on: [dec-product-repo-hosting]
+    wsjf: { business_value: 5, time_criticality: 2, risk_reduction: 3, job_size: 2 }
+    source: ["agentco-console-design.md §8.1", "agentco-console-design.md §8.2"]
+
+  - id: feat-cb-gates
+    kind: feature
+    nature: enabler
+    parent: epic-console-b
+    product: console
+    group: console-core
+    phase: console-b
+    state: draft
+    owner_role: bootstrap
+    title: "UI CI gates: sandbox conformance, integrity, a11y, visual regression, size"
+    wsjf: { business_value: 5, time_criticality: 2, risk_reduction: 13, job_size: 5 }
+    source: ["agentco-console-design.md §8.3"]
+
+  - id: feat-cb-preview
+    kind: feature
+    nature: enabler
+    parent: epic-console-b
+    product: console
+    group: console-core
+    phase: console-b
+    state: draft
+    owner_role: bootstrap
+    title: "Preview, adopt, and revert channel for console releases"
+    wsjf: { business_value: 8, time_criticality: 2, risk_reduction: 8, job_size: 3 }
+    source: ["agentco-console-design.md §8.4"]
+
+  - id: epic-console-c
+    kind: epic
+    nature: business
+    product: console
+    group: console-ui
+    phase: console-c
+    state: funnel
+    owner_role: product_owner
+    title: "Console phase C: company-driven console"
+    depends_on: [epic-console-b]
+    wsjf: { business_value: 8, time_criticality: 1, risk_reduction: 3, job_size: 13 }
+    source: ["agentco-console-design.md §8.6"]
+
+  - id: feat-cc-role-dashboards
+    kind: feature
+    nature: business
+    parent: epic-console-c
+    product: console
+    group: console-ui
+    phase: console-c
+    state: draft
+    owner_role: product_owner
+    title: "Role-maintained dashboards and the maintain_dashboard job"
+    wsjf: { business_value: 8, time_criticality: 1, risk_reduction: 3, job_size: 5 }
+    source: ["agentco-console-design.md §7.3"]
+
+  - id: feat-cc-portfolio
+    kind: feature
+    nature: business
+    parent: epic-console-c
+    product: console
+    group: console-ui
+    phase: console-c
+    state: draft
+    owner_role: product_owner
+    title: "Engine-backed portfolio overview, Kanban, budgets, and capacity pages"
+    wsjf: { business_value: 8, time_criticality: 1, risk_reduction: 2, job_size: 5 }
+    source: ["agentco-console-design.md §5.1"]
+
+  - id: feat-cc-personal
+    kind: feature
+    nature: business
+    parent: epic-console-c
+    product: console
+    group: console-ui
+    phase: console-c
+    state: draft
+    owner_role: product_owner
+    title: "Personal dashboards"
+    wsjf: { business_value: 5, time_criticality: 1, risk_reduction: 1, job_size: 3 }
+    source: ["agentco-console-design.md §7.5"]
+
+  - id: feat-cc-feedback
+    kind: feature
+    nature: business
+    parent: epic-console-c
+    product: console
+    group: console-ui
+    phase: console-c
+    state: draft
+    owner_role: product_owner
+    title: "'Improve this page' feedback and console usage metrics"
+    wsjf: { business_value: 8, time_criticality: 1, risk_reduction: 3, job_size: 3 }
+    source: ["agentco-console-design.md §8.1", "agentco-console-design.md §8.5"]
+
+  - id: story-cc-upstream
+    kind: story
+    nature: enabler
+    parent: feat-cc-feedback
+    product: console
+    group: console-ui
+    phase: console-c
+    state: draft
+    owner_role: human
+    title: "Sync worthwhile shell/style improvements back to the NWN editor (manual)"
+    source: ["agentco-console-design.md §12"]
+
+# ════════════════════════════════════════════════════════════════════════════
+# FUTURE SCOPE
+# ════════════════════════════════════════════════════════════════════════════
+
+  - id: epic-multi-client
+    kind: epic
+    nature: business
+    product: agentco
+    group: future
+    phase: later
+    state: funnel
+    owner_role: human
+    title: "Multi-client and multi-stakeholder operation"
+    wsjf: { business_value: 3, time_criticality: 1, risk_reduction: 2, job_size: 20 }
+    description: >-
+      Out of v0.1 scope. Collects: per-client data classes and tenant isolation;
+      per-stakeholder urgency and business hours; conflicting_stakeholder_input
+      handling; per-product resource shares beyond the Console.
+    source:
+      - "agentco-governance-policy.md §15"
+      - "agentco-service-management-design.md §18"
+      - "agentco-escalation-design.md §9"
+      - "agentco-core-engine-design.md §19"
+
+# ════════════════════════════════════════════════════════════════════════════
+# OWNER DECISIONS
+# Ready to decide now → awaiting_human.  Needs data first → draft.
+# ════════════════════════════════════════════════════════════════════════════
+
+  - id: dec-repo-visibility
+    kind: decision
+    product: agentco
+    group: decisions
+    state: awaiting_human
+    owner_role: human
+    title: "Repository visibility and what the public docs disclose"
+    question: >-
+      The docs name the LAN inference address, say it is unauthenticated,
+      describe the host hardware, and reference homerslotr.com and the NWN
+      repo; the commit author email is public. How should that be handled?
+    options:
+      - { id: a, label: "Make the repository private" }
+      - { id: b, label: "Stay public; replace addresses, hardware, and NWN references with placeholders" }
+      - { id: c, label: "Stay public as is" }
+    recommended: a
+    notes: "The docs describe current security gaps openly; private costs nothing while the design is in flux."
+    source: ["initial repo review 2026-09-27", "conversation 2026-09-27 (push summary)"]
+
+  - id: dec-sandbox-mechanism
+    kind: decision
+    product: agentco
+    group: decisions
+    phase: p1
+    state: awaiting_human
+    owner_role: human
+    title: "Sandbox mechanism for agent processes"
+    question: "What isolates each agent sandbox on the Windows host?"
+    options:
+      - { id: a, label: "One OS process per sandbox, own working dir, message-bus-only I/O" }
+      - { id: b, label: "Containers (Docker Desktop / WSL2)" }
+      - { id: c, label: "Separate Python interpreters in one process tree" }
+    recommended: a
+    notes: "The data layer design fixes the contract, not the mechanism. (a) is enough for phase 1; revisit before untrusted code execution."
+    source: ["agentco-data-layer-design.md §10"]
+
+  - id: dec-notification-channel
+    kind: decision
+    product: agentco
+    group: decisions
+    phase: p3
+    state: awaiting_human
+    owner_role: human
+    title: "Notification channel that reaches the owner away from the PC"
+    question: "Which channel carries operational alerts (SLA-1/SLA-2)?"
+    options:
+      - { id: a, label: "Self-hosted push service (e.g. ntfy)" }
+      - { id: b, label: "Private Discord channel via webhook (reuses existing Discord tooling)" }
+      - { id: c, label: "Email" }
+    recommended: a
+    notes: "Alerts carry counts and states only. Desktop toast alone does not meet SLA-1."
+    source: ["agentco-service-management-design.md §18", "agentco-monitor-driver-design.md §13"]
+
+  - id: dec-session-mechanism
+    kind: decision
+    product: console
+    group: decisions
+    phase: console-a
+    state: awaiting_human
+    owner_role: human
+    title: "Console authentication mechanism"
+    question: "How do console sessions authenticate, locally and remotely?"
+    options:
+      - { id: a, label: "Password + session cookie (roadmap_auth.py pattern); add WebAuthn before remote access" }
+      - { id: b, label: "WebAuthn / Windows Hello from the start" }
+      - { id: c, label: "Password + session cookie only" }
+    recommended: a
+    source: ["agentco-monitor-driver-design.md §13", "agentco-console-design.md §4"]
+
+  - id: dec-offsite-backup
+    kind: decision
+    product: agentco
+    group: decisions
+    phase: p4
+    state: awaiting_human
+    owner_role: human
+    title: "Offsite backup destination and encryption key custody"
+    question: "Where do encrypted offsite backups go, and where is the key kept?"
+    options:
+      - { id: a, label: "Rotated external drive stored offsite; key in a password manager" }
+      - { id: b, label: "Cloud object storage (supplier decision); key held offline" }
+    source: ["agentco-service-management-design.md §8.2", "agentco-service-management-design.md §18"]
+
+  - id: dec-data-at-rest
+    kind: decision
+    product: agentco
+    group: decisions
+    phase: p4
+    state: awaiting_human
+    owner_role: human
+    title: "Data-at-rest encryption for the stores"
+    question: "Is OS-level disk encryption enough for the SQLite stores (800-53 SC-28)?"
+    options:
+      - { id: a, label: "OS disk encryption only" }
+      - { id: b, label: "Per-store encryption (e.g. SQLCipher)" }
+      - { id: c, label: "Both" }
+    recommended: a
+    notes: "Check what this Windows 11 Home host supports: full BitLocker management is a Pro feature; Home offers Device Encryption on supported hardware."
+    source: ["agentco-governance-policy.md §15"]
+
+  - id: dec-product-repo-hosting
+    kind: decision
+    product: agentco
+    group: decisions
+    phase: console-b
+    state: awaiting_human
+    owner_role: human
+    title: "Where product repositories are hosted"
+    question: "Local git server on the LAN, or GitHub private repos?"
+    options:
+      - { id: a, label: "Local Gitea on the LAN (code stays on-network)" }
+      - { id: b, label: "GitHub private repositories (supplier decision with a data-class ceiling)" }
+    source: ["agentco-change-config-mgmt-design.md §16"]
+
+  - id: dec-chat-budget
+    kind: decision
+    product: console
+    group: decisions
+    phase: p3
+    state: awaiting_human
+    owner_role: human
+    title: "Daily budget for chat with Client Communications"
+    question: "What daily cap should the chat budget line start at?"
+    recommended: "Start small (a few dollars/day) and calibrate from the cost view"
+    source: ["agentco-console-design.md §12"]
+
+  - id: dec-docs-folder
+    kind: decision
+    product: agentco
+    group: decisions
+    phase: design
+    state: awaiting_human
+    owner_role: human
+    title: "Move design documents into a docs/ folder?"
+    question: "Keep design docs at the repo root, or move them into docs/?"
+    options:
+      - { id: a, label: "Move to docs/" }
+      - { id: b, label: "Keep at the root" }
+    source: ["initial repo review 2026-09-27"]
+
+  - id: dec-t2-ceiling
+    kind: decision
+    product: agentco
+    group: decisions
+    phase: p2
+    state: draft
+    owner_role: human
+    title: "T2 data-class ceiling after the supplier assessment"
+    question: "May DeepSeek-V4-pro via OpenCode receive Confidential data?"
+    depends_on: [story-supplier-deepseek]
+    notes: "Until decided, Confidential work skips T2 (measure the cost of that)."
+    source: ["agentco-governance-policy.md §15"]
+
+  - id: dec-t3-canary-shadow
+    kind: decision
+    product: agentco
+    group: decisions
+    phase: p4
+    state: draft
+    owner_role: human
+    title: "Shadow-mode canaries for T3 prompt changes"
+    question: "Accept doubled T3 cost during canary periods for single-instance roles?"
+    source: ["agentco-change-config-mgmt-design.md §16"]
+
+  - id: dec-t3-delegation
+    kind: decision
+    product: agentco
+    group: decisions
+    phase: later
+    state: draft
+    owner_role: human
+    title: "Explicit T3 delegation during long outages"
+    question: "Should the owner be able to delegate T3 authority to T2 for a bounded period?"
+    notes: "v0.1 answer is no. Revisit with real outage data."
+    source: ["agentco-service-management-design.md §18"]
+
+  - id: dec-provisional-defaults
+    kind: decision
+    product: agentco
+    group: decisions
+    phase: later
+    state: draft
+    owner_role: human
+    title: "Enable provisional defaults for ambiguous_original_intent?"
+    question: "After a few PIs of stale-request data, enable provisional proceeding for this trigger?"
+    source: ["agentco-service-management-design.md §18"]
+
+  - id: dec-ux-role
+    kind: decision
+    product: console
+    group: decisions
+    phase: console-c
+    state: draft
+    owner_role: human
+    title: "UX design capacity for the console"
+    question: "Route UI tasks to T2, add a ux_designer role, or rely on the reject-with-note loop?"
+    depends_on: [feat-cc-feedback]
+    notes: "Decide from preview adoption and reject rates."
+    source: ["agentco-console-design.md §12"]
+
+  - id: dec-iteration-length
+    kind: decision
+    product: agentco
+    group: decisions
+    phase: p5
+    state: draft
+    owner_role: human
+    title: "Agent iteration length"
+    question: "One-day iterations, or close iterations on committed scope alone?"
+    depends_on: [feat-p0-sim]
+    notes: "Compare both in simulation once behavior models are calibrated."
+    source: ["agentco-core-engine-design.md §19"]
+
+  - id: dec-engine-audit-merge
+    kind: decision
+    product: agentco
+    group: decisions
+    phase: p4
+    state: draft
+    owner_role: human
+    title: "Merge the engine event log and the audit log?"
+    question: "One hash-chained store, or separate stores with different retention rules?"
+    notes: "Kept separate for v0.1."
+    source: ["agentco-core-engine-design.md §19"]
+
+  - id: dec-what-if-scope
+    kind: decision
+    product: console
+    group: decisions
+    phase: console-c
+    state: draft
+    owner_role: human
+    title: "What-if scenario scope in the console"
+    question: "Which parameters may the owner vary in what-if scenarios?"
+    recommended: "Start with scope, budget, and instance counts"
+    source: ["agentco-monitor-driver-design.md §13"]
+
+  - id: dec-sandbox-friction
+    kind: decision
+    product: console
+    group: decisions
+    phase: console-b
+    state: draft
+    owner_role: human
+    title: "Keep the sandboxed presentation frame?"
+    question: "If the postMessage bridge slows development too much, accept a same-origin presentation with Trusted Types?"
+    depends_on: [feat-ca-sandbox]
+    notes: "The fallback is weaker and needs its own risk acceptance."
+    source: ["agentco-console-design.md §12"]
+
+  - id: dec-directive-render-check
+    kind: decision
+    product: agentco
+    group: decisions
+    phase: p4
+    state: draft
+    owner_role: human
+    title: "Per-render hash check of the directive partial?"
+    question: "Add a per-render hash check, or rely on startup and hourly drift detection?"
+    recommended: "Rely on drift detection"
+    source: ["agentco-company-directive.md §9"]
