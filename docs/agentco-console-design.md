@@ -1,6 +1,6 @@
 # AgentCo — Console (Human Interface) Design
 
-**Design document v0.1**
+**Design document v0.2**
 **Scope:** The web interface the human uses to see, steer, and talk to the company. It covers:
 - what it reuses from the NWN roadmap editor (`nwn-homers-lotr/bin/roadmap-editor.py`), in both structure and visual style
 - a conversational interface to Claude
@@ -9,6 +9,11 @@
 - how the console becomes **a product AgentCo itself builds and improves**, without the company ever being able to change what the human is told or what the human approves
 
 This refines the monitor/driver design (v0.2). That document defines *what* the monitor must show and do. This one defines *how the interface is built, who builds it, and how it's kept honest.*
+
+| Version | Changes |
+|---|---|
+| v0.1 | Original design: NWN shell reuse, trusted core vs. sandboxed presentation, chat with Claude, metric registry, role dashboards, the console as Product 0 |
+| v0.2 | Named agents with pages and worker queues (§5.3); knowledge base pages (§5.4); the live Vensim-style company diagram with live, replay, and what-if modes (§5.5) |
 
 ---
 
@@ -194,7 +199,8 @@ The navigator follows NWN's shape: sections of one-link-per-line entries, filter
 | Section | Pages |
 |---|---|
 | **Inbox** | ● Inbox · ● Decision log · ● Approvals · ● Change approval meetings · ○ My chat threads |
-| **Company** | ○ Overview (home) · ○ Org chart & agents · ○ Iteration board · ○ Backlog (board / list) · ○ PI & roadmap · ○ Work queues by role |
+| **Company** | ○ Overview (home) · ○ **Company diagram** (live stock-and-flow, §5.5) · ○ Org chart & agents · ○ Agent pages & queues board (§5.3) · ○ Iteration board · ○ Backlog (board / list) · ○ PI & roadmap |
+| **Knowledge** | ○ Search · ○ Articles · ○ Review queue · ○ Gaps · ○ Lessons register · ○ Owner's handbook · ○ Meetings · ○ Mailboxes · ○ Files & deliverables (§5.4) |
 | **Portfolio** | ○ Portfolio overview · ○ Portfolio Kanban · ○ Products (one per product, including the Console) · ○ Budgets & capacity allocation |
 | **Claude** | ○ Talk to the company (chat) · ○ Discuss… (item-scoped chats) · ○ Conversation history |
 | **Metrics** | ● Company scorecard · ○ Flow metrics · ○ DORA · ○ Cost & capacity · ○ Service levels · ○ Forecasts & what-if · ○ Role dashboards (one per role, agent-maintained, §7.3) · ○ My dashboards |
@@ -206,7 +212,7 @@ The navigator follows NWN's shape: sections of one-link-per-line entries, filter
 ### 5.1 Key presentation pages
 
 - **Overview (home):** answers "what needs me, and is everything OK?" in one screen. It shows the inbox count by urgency, service mode, spend today against guardrail, per-product RAG, what finished since the last visit, and decisions made without you since the last visit. The console's own north-star metric (§8.5) is measured against this page.
-- **Org chart & agents:** the org chart rendered live, with each role's instances, tier colors, current jobs, health, and a link to that role's dashboard. It's the "company" view: who works here and what they're doing right now.
+- **Org chart & agents:** the org chart rendered live, with each role's **named agents**, tier colors, current jobs, health, and links to each agent's page and the role's dashboard. It's the "company" view: who works here and what they're doing right now.
 - **Portfolio overview:** one row per product (client products and the Console itself) with RAG, forecast P50/P85, budget burn against guardrail, capacity share, open decisions, and active epics.
 - **Portfolio Kanban:** epics across products through the SAFe portfolio states (Funnel → Reviewing → Analyzing → Ready → Implementing → Done), each card carrying its Lean business case and WSJF. Details come in the SAFe/PMO design.
 - **Budgets & capacity allocation:** how paid budget and local capacity are split across products (§8.2), with actual against allocated.
@@ -219,6 +225,83 @@ Until the engine exists, the backlog lives in [`roadmap.yaml`](../roadmap.yaml) 
 - decision items render like inbox entries
 
 Build phase 0 imports the file into the engine as seed events (`feat-p0-seed-import`). After that, the engine is the system of record and `roadmap.yaml` becomes a generated export. `bin/roadmap-lint.py` validates the file (structure, references, states per kind, Definition of Ready, dependency cycles) and runs in the AgentCo repo's CI.
+
+### 5.3 Agents and worker queues
+
+Every agent is a **named, persistent member of the company** (core engine design §3.4), so the console shows people, not just roles: *Rowan Ellis — Developer*, *Priya Natarajan — Tester*. Names are display only. Access control still keys on the agent ID bound to a sandbox; a name grants nothing. The console refers to agents by name and role and **never infers pronouns from a name**.
+
+- **Agent page** (`/#agent-<id>`, opened from the Org chart, a queue, or any card):
+  - name, role, and tier colors; roster status (active, on leave, retired) and sandbox state (bound, unbound, held)
+  - locked engagement terms (agent API design §6)
+  - the current job and its trace
+  - the worker queue (below) and recent completions
+  - this agent's slice of its role dashboard; escalation and referral history; memory size
+- **Worker queue**, one per agent, in the NWN UAT Queue's shape: a worklist, not a report.
+
+  | Section | Contents |
+  |---|---|
+  | **Now** | The leased job: what, since when, which model, budget used |
+  | **Pinned to this agent** | Rework on its own diff, meeting turns, referral answers owed. The engine routes these back to the same agent for context continuity (core engine design §3.4) |
+  | **Up next** | Its role's shared ready pool, in scheduler order, with this agent's eligibility (engagement scope, budget left) |
+  | **Waiting** | Its items blocked on a referral, a human request, or a held tier, with what each waits on |
+
+- **Queues board:** all agents side by side, one lane per agent, grouped by role and filterable by product. It's the NWN board with agents as lanes instead of statuses.
+- **Read-only by design.** The owner can pause an agent (run control), but can't hand-assign work: assignment is the scheduler's job, and an override would bypass engagement scope and WIP limits. To change priorities, the owner talks to the Product Owner (monitor design §7).
+
+### 5.4 The knowledge base
+
+The console shows the whole knowledge base (knowledge design §2–§6), ACL-exempt like everything else here:
+- **Search:** the same deterministic FTS search agents use, so the owner sees exactly what an agent would find.
+- **Article view:** body, version history, reuse count, and the article's links in the traceability graph: the incidents it resolved, the changes it informed, and the lessons it records.
+- **Review queue:** the knowledge manager's drafts awaiting review, as that agent's worker queue.
+- **Gaps:** the article-gap digest, i.e. escalations that found nothing.
+- **Lessons register:** open lessons with their verification condition and due date; repeat lessons highlighted.
+- **Owner's handbook:** procedures and decision explainers, filtered and readable as a handbook. Articles about policy or change governance are accepted by the owner through the trusted confirmation dialog.
+- **Owner input:** *Flag this article* or *Suggest an article* goes to the knowledge manager's queue as a labeled client note. The owner doesn't edit articles directly; articles stay owned and reviewed.
+
+### 5.5 The live company diagram
+
+A **Vensim-style stock-and-flow diagram of the engine running**: the owner's single view of where everything is in the lifecycle.
+
+```
+           intake          refine           decompose          dispatch
+ (cloud) ══▶[ Ideas ]══▶══[ Stories ]══▶══[ Tasks ready ]══▶══[ In progress ]
+                                                ▲                   ║ submit
+                                                ║ rework (B1)       ▼
+ [ Released ]◀═ release ═[ Done ]◀═ merge ═[ In test ]◀═ gates ═[ In review ]
+                                                                    ║ escalate / refer
+   [ KB articles ] ──(−) deflection (B2)──▶ [ Escalations ]═══▶ resolved
+   ○ WIP limits  ○ agents per role  ○ GPU slots  ○ budget left  ○ service mode  ○ run state
+```
+
+**Notation:**
+- **Stocks** (boxes) are counts of items in a state.
+- **Flows** (double pipes with valves) are transitions, with rates per hour and per iteration.
+- **Auxiliaries** (circles) are the constraints and parameters that throttle flows.
+- **Causal links** carry polarity (+/−), and **feedback loops** are labeled (B = balancing, R = reinforcing).
+
+**Generated, not drawn.** The engine exports a `flow_graph` projection derived from `workflow.yaml` and the org chart: every state is a stock, every transition a flow, every guard or limit an auxiliary (core engine design §11.1). The diagram therefore can't drift from the real state machines. Only positions are hand-tuned, in a layout file: pipeline order left to right, like the NWN board's lanes. Anything without a position is auto-laid out.
+
+**What it shows live:**
+- **Stocks and flows:** stock levels from engine projections; flow rates as moving averages; dots moving along each pipe in proportion to its rate.
+- **Binding constraints:** a valve turns amber when a WIP limit is reached, and red when a breaker is open or a budget is exhausted. Paused, every flow visibly stops.
+- **Feedback loops:**
+
+  | Loop | Path | What it tells the owner |
+  |---|---|---|
+  | **B1 Rework** | In test → fail → back to In progress | A heavy rework flow means tasks or criteria are wrong, not code (core engine design §5.2) |
+  | **B2 Knowledge deflection** | Escalations → article gaps → KB articles → (−) escalations | Whether the knowledge base is paying off |
+  | **B3 WIP limits** | A full downstream stock closes the upstream valve | Where the bottleneck is right now |
+  | **R1 Overflow cost** | Local queue → paid-tier overflow → budget drain → paid tiers parked → longer local queue | When capacity overflow starts feeding on itself |
+
+- **Drill-down:** clicking a stock opens its items as a list tab; clicking a flow shows recent transitions with their traces; clicking *agents per role* opens the queues board (§5.3). Sub-diagrams cover the escalation ladder (T0 → T3 as its own chain) and the knowledge loop. A product filter narrows everything to one product.
+
+**Three modes, one diagram:**
+- **Live:** the current state, updated over the WebSocket.
+- **Replay:** scrub through the event log to see the company at any past moment (monitor design §5.7).
+- **What-if:** like Vensim's SyntheSim, sliders on the auxiliaries (instances per role, WIP limits, budget, iteration length) run simulation mode (core engine design §12). Projected stock levels are overlaid as ghost bars in the `--simulated` frame. A what-if never changes anything. *Propose this change* files a change proposal, which the owner approves like any other.
+
+**Integrity:** every number comes from a projection or a registered metric (§7.4), and simulated overlays always carry the simulated frame. The diagram is presentation code with no LLM involved. The engine's `flow_graph` projection is its only source of structure.
 
 ---
 
@@ -489,6 +572,7 @@ The company can't build the console it needs in order to run. So:
 | Service management design §2.3 | Chat reply OLA; console page-performance SLO; *Improve this page* as intake |
 | Company directive | New principle D13: our own interface is product (applied in directive v1.1) |
 | Client Communications prompt | `converse` mode; metric-citation rule; "chat is not a command channel" handling |
+| Core engine design §3, §11 | Named-agent roster; `agent_queues`, `flow_graph`, and `flow_rates` projections — **done in core engine design v0.3** |
 
 ---
 
@@ -497,4 +581,5 @@ The company can't build the console it needs in order to run. So:
 - **Is a UX role needed?** UI design quality from T0 local models may be weak. Options: route `implement_ui_task` to T2 by default, add a `ux_designer` role (T2) that produces page specs and HTML mockups the human reviews in preview, or rely on the human's *Reject with note* loop. Measure adoption and reject rates first (§8.5).
 - **Sandbox friction:** a `postMessage` bridge adds a layer every page must go through. If it slows development too much, the fallback is a same-origin presentation with a strict Trusted Types policy. That's weaker and would need its own risk acceptance.
 - **Chart library choice** and whether the charting wrappers belong in the trusted core, so metric rendering is identical everywhere, or in presentation.
+- **Diagram scale:** a stock-and-flow view stays legible up to a few dozen stocks. Whether several products need one diagram each, or one diagram with a product filter, is best decided once two products run.
 - **Upstreaming:** improvements the company makes to the shared shell style could flow back to the NWN editor. That's a manual, human-driven sync (the repos stay independent, §2.3).

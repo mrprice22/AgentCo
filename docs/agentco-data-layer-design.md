@@ -58,7 +58,7 @@ Two things make this different from a typical "shared vector DB all agents query
 
 ## 3. Memory taxonomy
 
-Every agent has one persistent store: a SQLite file, one per agent, **encrypted with SQLCipher** (§9). It holds **two tables**, the episodic log (§3.2) and semantic notes (§3.3). Working memory (§3.1) is the third *kind* of memory, but it isn't a table: it's the live context window. Shared records (§3.4) live outside any agent's store.
+Every agent has one persistent store: a SQLite file, one per **named agent** (core engine design §3.4), **encrypted with SQLCipher** (§9). The store belongs to the agent, not the sandbox, so it survives sandbox restarts and iterations; a retired agent's store is archived, not deleted. It holds **two tables**, the episodic log (§3.2) and semantic notes (§3.3). Working memory (§3.1) is the third *kind* of memory, but it isn't a table: it's the live context window. Shared records (§3.4) live outside any agent's store.
 
 ### 3.1 Working memory (ephemeral — not a table, just the live context window)
 
@@ -143,7 +143,7 @@ Every message carries enough metadata for the broker to route it and for the rec
 ```json
 {
   "msg_id": "msg_6a19...",
-  "from": {"sandbox_id": "sbx-07", "role": "product_owner", "instance": 1, "tier": "T2"},
+  "from": {"agent_id": "agt-0003", "name": "Mara Quist", "sandbox_id": "sbx-07", "role": "product_owner", "tier": "T2"},
   "to": {"role": "developer"},
   "task_id": "task_1284",
   "topic": "story_88.acceptance_criteria",

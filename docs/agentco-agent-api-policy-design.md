@@ -242,7 +242,7 @@ engagement_id: eng-dev-sbx14-it42
 version: 1
 template: "engagements/developer.yaml@blob:9c1e…"
 baseline_id: bl_2026_10_04_a
-bound_to: { sandbox_id: sbx-14, role: developer, instance: 2 }
+bound_to: { agent_id: agt-0007, name: "Rowan Ellis", sandbox_id: sbx-14, role: developer }
 policy:
   directive: v1.1
   governance_policies: [P-1, P-2, P-4, P-5, P-9]

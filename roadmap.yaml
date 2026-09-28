@@ -714,6 +714,18 @@ items:
     title: "Owner-attended change approval meeting and owner-set pre-approval catalog"
     date: "2026-09-27"
 
+  - id: feat-console-v02-design
+    kind: feature
+    nature: enabler
+    parent: epic-design-consistency
+    product: agentco
+    group: design-docs
+    phase: design
+    state: done
+    owner_role: bootstrap
+    title: "Named agents, worker queues, knowledge pages, and the live company diagram (design)"
+    date: "2026-09-27"
+
   - id: feat-owner-actions-0927
     kind: feature
     nature: enabler
@@ -995,6 +1007,7 @@ items:
     acceptance_criteria:
       - "Every template includes an engagement block: policy, contract obligations, scope, out-of-scope"
       - "Rendering fails closed when no locked engagement is supplied"
+      - "The engagement block states the agent's name, role, and agent ID"
     source: ["docs/agentco-agent-api-policy-design.md §6.4"]
 
   - id: story-prompts-collab
@@ -1339,6 +1352,33 @@ items:
     wsjf: { business_value: 8, time_criticality: 8, risk_reduction: 13, job_size: 3 }
     description: "config/raci.yaml → permissions.lock; one A per activity, SoD on approvals, no orphan verbs, owner-only approvals never generated for agents."
     source: ["docs/agentco-agent-api-policy-design.md §4"]
+
+  - id: feat-p0-roster
+    kind: feature
+    nature: enabler
+    parent: epic-build-p0
+    product: agentco
+    group: engine
+    phase: p0
+    state: draft
+    owner_role: bootstrap
+    title: "Named-agent roster: generated names, hire, rename, retire, pinned rework"
+    wsjf: { business_value: 5, time_criticality: 5, risk_reduction: 3, job_size: 3 }
+    source: ["docs/agentco-core-engine-design.md §3.4"]
+
+  - id: feat-p0-flow-graph
+    kind: feature
+    nature: enabler
+    parent: epic-build-p0
+    product: agentco
+    group: engine
+    phase: p0
+    state: draft
+    owner_role: bootstrap
+    title: "flow_graph and flow_rates projections derived from workflow.yaml"
+    depends_on: [feat-p0-event-store]
+    wsjf: { business_value: 8, time_criticality: 5, risk_reduction: 3, job_size: 3 }
+    source: ["docs/agentco-core-engine-design.md §11.1"]
 
   # ── Phase 1 ───────────────────────────────────────────────────────────────
   - id: epic-build-p1
@@ -2167,6 +2207,35 @@ items:
     wsjf: { business_value: 5, time_criticality: 2, risk_reduction: 5, job_size: 3 }
     source: ["docs/agentco-console-design.md §9.1", "docs/agentco-monitor-driver-design.md §13"]
 
+  - id: feat-ca-company-diagram
+    kind: feature
+    nature: business
+    parent: epic-console-a
+    product: console
+    group: console-ui
+    phase: console-a
+    state: draft
+    owner_role: bootstrap
+    title: "Live company stock-and-flow diagram: live, replay, and what-if modes"
+    depends_on: [feat-p0-flow-graph, feat-p0-sim, feat-ca-shell]
+    wsjf: { business_value: 13, time_criticality: 5, risk_reduction: 5, job_size: 8 }
+    notes: "Works against simulation mode from phase 0, before any real agent runs."
+    source: ["docs/agentco-console-design.md §5.5"]
+
+  - id: feat-ca-agent-queues
+    kind: feature
+    nature: business
+    parent: epic-console-a
+    product: console
+    group: console-ui
+    phase: console-a
+    state: draft
+    owner_role: bootstrap
+    title: "Agent pages, per-agent worker queues, and the queues board"
+    depends_on: [feat-p0-roster, feat-ca-shell]
+    wsjf: { business_value: 8, time_criticality: 3, risk_reduction: 3, job_size: 5 }
+    source: ["docs/agentco-console-design.md §5.3"]
+
   - id: epic-console-b
     kind: epic
     nature: enabler
@@ -2294,9 +2363,10 @@ items:
     phase: console-c
     state: draft
     owner_role: product_owner
-    title: "Knowledge, lessons, meetings, mailboxes, and deliverables pages"
+    title: "Knowledge base, lessons, meetings, mailboxes, and deliverables pages"
     wsjf: { business_value: 8, time_criticality: 1, risk_reduction: 3, job_size: 5 }
-    source: ["docs/agentco-knowledge-collaboration-design.md §11"]
+    depends_on: [feat-p2-knowledge]
+    source: ["docs/agentco-console-design.md §5.4", "docs/agentco-knowledge-collaboration-design.md §11"]
 
   - id: story-cc-upstream
     kind: story
@@ -2696,3 +2766,21 @@ items:
     resolution: "Yes (option a), folded into the core engine v0.2 change."
     date: "2026-09-27"
     source: ["owner suggestion 2026-09-27", "docs/agentco-knowledge-collaboration-design.md §4.1"]
+
+  - id: dec-agent-naming
+    kind: decision
+    product: agentco
+    group: decisions
+    phase: p0
+    state: done
+    owner_role: human
+    title: "How do agents get first and last names?"
+    question: "Generated names, owner-chosen names, or names the agents pick themselves?"
+    options:
+      - { id: a, label: "Generated from a curated list; the owner can rename" }
+      - { id: b, label: "The owner names every agent" }
+      - { id: c, label: "Each agent picks its own name" }
+    recommended: a
+    resolution: "Generated from a curated list, seeded for replay; the owner can rename (option a)."
+    date: "2026-09-27"
+    source: ["owner request 2026-09-27", "docs/agentco-core-engine-design.md §3.4"]

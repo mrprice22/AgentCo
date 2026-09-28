@@ -1,6 +1,6 @@
 # AgentCo — Core Business Simulation Engine
 
-**Design document v0.2**
+**Design document v0.3**
 **Scope:** The engine that makes the simulated company *run*. Covers:
 - the org model (who exists)
 - the work model (what gets done)
@@ -17,6 +17,7 @@ This design owns `org_chart.yaml`, `workflow.yaml`, `task_bounds.yaml`, and the 
 |---|---|
 | v0.1 | Original design: org and work models, workflow, decomposition and bounds, scheduling, job cycle, escalation vs. referral, time model, event sourcing, simulation mode, build phases |
 | v0.2 | Integrates the Agent API and policy manager (engagement binding, generated transition permissions); knowledge and collaboration (meetings, lessons, and conversations as work kinds; closure guards; search before escalating); the console (products and capacity shares, `converse`, `maintain_dashboard`); service management (owner-request fields, provisional decisions, service inputs to the scheduler); the change approval meeting and pre-approval catalog; and two new roles, `change_coordinator` and `knowledge_manager`. §17 now follows `roadmap.yaml`. `tools_allowed` removed from the org chart. |
+| v0.3 | Named-agent roster with generated names the owner can rename, hiring and retiring, and pinned rework (§3.4); `agent_queues`, `flow_graph`, and `flow_rates` projections for the console's worker queues and live company diagram (§11.1) |
 
 ---
 
@@ -143,6 +144,26 @@ The prompt templates currently mix two different things under "escalate":
 - **Referral.** *The question isn't this role's to answer.* It goes to the role that owns it, at that role's default tier for `answer_referral`. Triggers: ambiguous acceptance criteria (goes to the PO), scope violation (goes to the Architect to re-decompose), business tradeoffs (goes to the PO), beyond PO authority (goes to Exec Director).
 
 Escalating a question about ambiguous acceptance criteria up the *tier* ladder just pays a smarter model to guess at the Product Owner's intent. It needs a *referral*. §9 gives the engine's mapping from trigger to action, and the worker contract gains a field so agents can say which one they mean (§8.2).
+
+### 3.4 Named agents: the roster
+
+Roles say *what* a job needs; the **roster** says *who* does it. Every agent is a named, persistent member of the company, kept as event-sourced records (§11):
+
+```yaml
+agent_id: agt-0007
+first_name: Rowan
+last_name: Ellis
+role: developer
+status: active            # active | on_leave | retired
+hired_at: "2026-10-04"
+memory_store: mem-agt-0007
+```
+
+- **Hiring and retiring.** When the scheduler scales a role up within its `instances` range (§3.1), the engine *hires*: it creates a roster record, an empty memory store, and required reading from the engagement template (onboarding). Scaling down *retires* the least recently used agent. Its memory store is archived, not deleted, under the retention policy (governance design §12).
+- **Names are generated, and the owner can rename** (owner decision, 2026-09-27). The engine assigns a first and last name from a curated, diverse list, seeded deterministically so replay reproduces the same names, and never reuses an active name. Renaming is a console command, recorded in the audit log.
+- **Names are display only.** Identity for access control is the `agent_id` bound to a sandbox (agent API design §2); a name grants nothing, and two agents can't share one. Pronouns are never inferred from a name: the console and generated reports refer to agents by name and role.
+- **Agents know their own names.** The engagement summary in each prompt says who the agent is (*"You are Rowan Ellis, Developer, agt-0007"*), so meeting contributions, mail, and write-back notes are signed consistently.
+- **Continuity.** An agent keeps its memory across sandbox restarts and iterations, because the store belongs to the agent, not the sandbox (data layer design §3). Rework on an agent's own diff, and referral answers it owes, are **pinned** to that agent when it's available. That preserves context and makes per-agent performance meaningful. If the agent is unavailable, the work returns to the role's pool.
 
 ---
 
@@ -531,6 +552,11 @@ The engine's system of record is an **append-only event log**. Every state in §
 - `causation_id` points to the event that directly caused this one.
 - **Model outputs are stored in full as events.** This is the key to replay.
 
+Three projections exist specifically for the console:
+- `agent_queues`: per named agent, its leased job, pinned work, eligible share of the role pool, and waiting items (console design §5.3).
+- `flow_graph`: the structure of the company as a stock-and-flow model, **derived from `workflow.yaml` and the org chart** (states → stocks, transitions → flows, guards and limits → auxiliaries), so the live diagram can't drift from the real state machines (console design §5.5).
+- `flow_rates`: stock levels and moving-average flow rates, fed live over the WebSocket, and rebuilt at any past moment for replay.
+
 ### 11.2 How it relates to the other stores
 
 | Store | Answers | Written by |
@@ -659,6 +685,8 @@ agentco/
     requests.py           # human_request lifecycle, urgency, provisional decisions (§4.5)
     meetings.py  lessons.py  conversations.py   # §4.6
     portfolio.py          # products and capacity shares (§7.4)
+    roster.py             # named agents: hire, rename, retire, pinning (§3.4)
+    flow_graph.py         # stock-and-flow projection for the console diagram (§11.1)
     events.py, projections.py, replay.py
   ports/                  # interfaces the core depends on
   adapters/
