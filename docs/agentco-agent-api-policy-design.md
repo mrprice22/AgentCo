@@ -146,41 +146,41 @@ When an activity's accountable party is the owner, the approve verb **isn't gene
 
 ### 4.4 The matrix
 
-A = accountable (exactly one), R = responsible, C = consulted, I = informed. **Coord** is the change & release coordinator (§5.3). **Driver** is deterministic plumbing, not an agent.
+A = accountable (exactly one), R = responsible, C = consulted, I = informed. **Coord** is the change & release coordinator (§5.3). **KM** is the knowledge manager (knowledge design §4.1). **Driver** is deterministic plumbing, not an agent.
 
-| Activity | Owner | ED | CC | PO | Arch | Dev | Test | Sec | SM | Coord | Driver |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| Capture intake | A | I | R | I | | | | | | | |
-| Set vision | A | R | C | C | | | | | | | |
-| Refine backlog | | A | | R | C | | | | I | | |
-| Decompose story | | | | A | R | C | I | | | | |
-| Architecture decision | | A | | C | R | I | | C | | | |
-| Implement task | | | | | A | R | I | | | | |
-| Security gate | | A | | | C | I | | R | | | |
-| Test and verify | | | | A | | I | R | | | | |
-| Raise change request | | | | | A | R | R | R | | I | |
-| Assess change | | | | | C | | | C | | R | |
-| Approve standard change | A | | | | I | | | | | | R |
-| Approve normal-minor change | | | | | A | I | | C | | R | |
-| Approve normal-major change | I | A | | C | C | | | C | | R | |
-| Merge to trunk | | | | | A | I | I | | | | R |
-| Assemble release | | | | A | C | | C | | I | R | |
-| Approve production release | A | C | | I | | | C | | | R | |
-| Set the pre-approval catalog | A/R | C | | | C | | | C | | C | |
-| Chair the change approval meeting | A/R | C | | | C | | C | C | | R | R |
-| Deploy to production | A | I | | | | | C | | | C | R |
-| Incident response | A | I | | | C | | | C | I | | R |
-| Problem root cause | I | A | | | R | | | C | C | | |
-| Author knowledge article | | | | | C | R | R | R | A | | |
-| Capture and close lessons | I | A | C | C | C | C | C | C | R | C | |
-| Facilitate meetings | | | | | | | | | A | | R |
-| Maintain own role dashboard | I | R | R | A | R | R | R | R | R | R | |
-| Author engagement templates | A | R | | | C | | | | C | | |
-| Lock an engagement instance | A | C | | | | | | | | | R |
-| Change RACI or permissions | A | R | | | C | | | C | | | |
-| Start / Pause the simulation | A/R | | | | | | | | | | I |
+| Activity | Owner | ED | CC | PO | Arch | Dev | Test | Sec | SM | KM | Coord | Driver |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Capture intake | A | I | R | I | | | | | | | | |
+| Set vision | A | R | C | C | | | | | | | | |
+| Refine backlog | | A | | R | C | | | | I | | | |
+| Decompose story | | | | A | R | C | I | | | | | |
+| Architecture decision | | A | | C | R | I | | C | | | | |
+| Implement task | | | | | A | R | I | | | | | |
+| Security gate | | A | | | C | I | | R | | | | |
+| Test and verify | | | | A | | I | R | | | | | |
+| Raise change request | | | | | A | R | R | R | | | I | |
+| Assess change | | | | | A | | | C | | | R | |
+| Approve standard change | A | | | | I | | | | | | | R |
+| Approve normal-minor change | | | | | A | I | | C | | | R | |
+| Approve normal-major change | I | A | | C | C | | | C | | | R | |
+| Merge to trunk | | | | | A | I | I | | | | | R |
+| Assemble release | | | | A | C | | C | | I | | R | |
+| Approve production release | A | C | | I | | | C | | | | R | |
+| Set the pre-approval catalog | A/R | C | | | C | | | C | | | C | |
+| Chair the change approval meeting | A/R | C | | | C | | C | C | | | R | R |
+| Deploy to production | A | I | | | | | C | | | | C | R |
+| Incident response | A | I | | | C | | | C | I | | | R |
+| Problem root cause | I | A | | | R | | | C | C | C | | |
+| Author knowledge article | | | | | C | R | R | R | | A | | |
+| Capture and close lessons | I | A | C | C | C | C | C | C | C | R | C | |
+| Facilitate meetings | | | | | | | | | A | | | R |
+| Maintain own role dashboard | I | R | R | A | R | R | R | R | R | R | R | |
+| Author engagement templates | A | R | | | C | | | | C | | | |
+| Lock an engagement instance | A | C | | | | | | | | | | R |
+| Change RACI or permissions | A | R | | | C | | | C | | | | |
+| Start / Pause the simulation | A/R | | | | | | | | | | | I |
 
-**"Author knowledge article"** means R for whichever role resolved the issue, with the Scrum Master accountable as knowledge manager. **"Approve standard change"** has the owner as A because the owner sets the pre-approval catalog (change/config design §4.3); the driver applies it mechanically. In the change approval meeting, the change coordinator presents and the driver facilitates.
+**"Author knowledge article"** means R for whichever role resolved the issue, with the knowledge manager accountable for publishing. **"Approve standard change"** has the owner as A because the owner sets the pre-approval catalog (change/config design §4.3); the driver applies it mechanically. In the change approval meeting, the change coordinator presents and the driver facilitates.
 
 ---
 
@@ -363,7 +363,7 @@ Registry metrics (console design §7.1):
 |---|---|
 | Data layer design §2, §5.4 | "Message bus is the only I/O" becomes "the Agent API is the only I/O; `mail.send` and publish are verbs on it". Topic `engagement.*` added — **done in data layer design v0.2** |
 | Escalation design §3 | `tools_allowed` is replaced by generated permissions (`permissions.lock`) — **done in escalation design v0.2** |
-| Core engine design §3.1, §8 | Org chart gains `change_coordinator`; the job cycle starts with `engagement.bind`; the prompt renderer inserts the engagement summary |
+| Core engine design §3.1, §8 | Org chart gains `change_coordinator`; the job cycle starts with `engagement.bind`; the prompt renderer inserts the engagement summary — **done in core engine design v0.2** |
 | Governance design §2.2, §6.2 | RACI there becomes the human-level summary of `config/raci.yaml`; least privilege is implemented by generated permissions |
 | Change/config design §4, §9 | Change coordinator role; release assembly; production approval is an owner console command |
 | Monitor design §4.2 | Supervisor spawns sandboxes unbound; binding and revocation states appear in Agent health |

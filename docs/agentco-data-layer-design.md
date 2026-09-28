@@ -188,10 +188,12 @@ topics:
   "change.proposal.system":         [executive_director]
   "release.*":                      [change_coordinator, tester, product_owner, executive_director]
   "engagement.*":                   []                  # each sandbox receives only its own, via engagement.get
-  "kb.engineering.*":               [developer, tester, architect, security_reviewer, scrum_master]
+  "kb.engineering.*":               [developer, tester, architect, security_reviewer, scrum_master,
+                                     knowledge_manager]
   "kb.process.*":                   [developer, tester, architect, security_reviewer, scrum_master,
+                                     knowledge_manager,
                                      product_owner, change_coordinator, executive_director, client_communications]
-  "kb.security.*":                  [security_reviewer, architect, executive_director]
+  "kb.security.*":                  [security_reviewer, architect, executive_director, knowledge_manager]
   "mail.*":                         per-recipient      # addressed; broker checks the mail's topic tags per recipient
   "meeting.*":                      per-meeting        # participants must be cleared for the meeting's scope
   "file.*":                         per-share          # file.share grants within RACI and need-to-know
@@ -230,7 +232,7 @@ publish_authority:
   "architecture.*":          [architect, executive_director]
   "change.proposal.system":  any                  # any role may propose; only the ED receives it
   "engagement.*":            [driver]             # locked by the driver from approved templates
-  "kb.*":                    [scrum_master]       # knowledge manager publishes; other roles draft via kb.draft
+  "kb.*":                    [knowledge_manager]  # other roles draft via kb.draft (knowledge design §4.1)
   "release.*":               [change_coordinator]
 ```
 

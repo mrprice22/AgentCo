@@ -337,6 +337,7 @@ Each agent role **owns and maintains its own dashboard**: what it thinks best sh
 | Scrum Master | Flow time, flow load vs. WIP limits, blocked time by cause, ceremony on-time rate |
 | Executive Director | Decisions without human, human-overturned decisions, human requests per PI, time to decide |
 | Client Communications | Chat response time, report on-time rate, "unclear question" flags from the human, unverified-figure rate |
+| Knowledge Manager | Deflection rate, article gap rate, time to publish, stale articles, lesson closure and repeat rates |
 
 **Guardrails against self-flattery:** a role's dashboard sits beside that role's slice of the **company scorecard**, which it can't edit. If a role's own dashboard and the canonical metrics disagree about how it's doing, both are on screen at once.
 
@@ -482,7 +483,7 @@ The company can't build the console it needs in order to run. So:
 | Document | Change |
 |---|---|
 | Monitor design §5, §11 | Page catalog splits into protected core pages and presentation pages; the natural-language feature is Client Comms' `converse` job type with the metric query tool, not a new role |
-| Core engine design §3.1, §4.4, §7, §19 | `converse` and `maintain_dashboard` job types; `conversation` work kind; per-product capacity shares (multi-product portfolio); Console registered as Product 0 |
+| Core engine design §3.1, §4.4, §7, §19 | `converse` and `maintain_dashboard` job types; `conversation` work kind; per-product capacity shares (multi-product portfolio); Console registered as Product 0 — **done in core engine design v0.2** |
 | Governance design §5, §6.2 | Client Comms need-to-know extended to metric aggregates and work-item projections; console usage data classified Internal; `tools_allowed: [query_metric]` for Client Comms |
 | Change/config design §2, §8 | Console core = system CI; `agentco-console` repo = product; UI-specific CI gates; preview/adopt/revert channel |
 | Service management design §2.3 | Chat reply OLA; console page-performance SLO; *Improve this page* as intake |

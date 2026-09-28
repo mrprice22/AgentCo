@@ -50,3 +50,4 @@ python bin/roadmap-lint.py --summary
 | `executive_director` | T3 (may contact the human) |
 | `client_communications` | T3 (may contact the human) |
 | `change_coordinator` | T0; T2 for release notes (template planned) |
+| `knowledge_manager` | T0; T2 for writing or merging articles (template planned) |

@@ -1,6 +1,6 @@
 # AgentCo — Core Business Simulation Engine
 
-**Design document v0.1**
+**Design document v0.2**
 **Scope:** The engine that makes the simulated company *run*. Covers:
 - the org model (who exists)
 - the work model (what gets done)
@@ -11,7 +11,12 @@
 - event-sourced state and replay
 - a simulation mode for forecasting and what-if analysis without spending tokens
 
-This is the "repo design" the escalation design refers to (`org_chart.yaml`, `task_bounds.yaml`, `backlog/models.py`). It's written down here for the first time, and other documents should treat this one as the owner of those files.
+This design owns `org_chart.yaml`, `workflow.yaml`, `task_bounds.yaml`, and the work model (formerly `backlog/models.py`); other documents point here for them.
+
+| Version | Changes |
+|---|---|
+| v0.1 | Original design: org and work models, workflow, decomposition and bounds, scheduling, job cycle, escalation vs. referral, time model, event sourcing, simulation mode, build phases |
+| v0.2 | Integrates the Agent API and policy manager (engagement binding, generated transition permissions); knowledge and collaboration (meetings, lessons, and conversations as work kinds; closure guards; search before escalating); the console (products and capacity shares, `converse`, `maintain_dashboard`); service management (owner-request fields, provisional decisions, service inputs to the scheduler); the change approval meeting and pre-approval catalog; and two new roles, `change_coordinator` and `knowledge_manager`. §17 now follows `roadmap.yaml`. `tools_allowed` removed from the org chart. |
 
 ---
 
@@ -22,8 +27,8 @@ The other designs each cover one piece: routing (escalation), memory and access 
 Three properties define it:
 
 1. **Deterministic, with no LLM inside.** The engine is a state machine plus a scheduler. It *invokes* agents; it's never one. Given the same event history it always reaches the same state (§11). This is the same boundary the monitor design draws for itself (§11 of that doc), for the same reason: anything that enforces rules must not be promptable.
-2. **Agents propose, the engine disposes.** No agent mutates state. Every agent output is a *proposal* (a diff, a verdict, a backlog change, a decision). The engine validates it against schema, authority, and policy, then applies its effects (§8). An agent that says "mark story 88 done" has asked; only the engine can do it.
-3. **I/O through ports, logic in the core.** The engine core never touches a socket, a file, a model, or a clock directly. It talks to *ports* (message bus, model router, sandbox pool, repo, CI, clock, event store). Real adapters make it run the company; simulated adapters make it *simulate* the company (§12). The same code serves both.
+2. **Agents propose, the engine disposes.** No agent mutates state. Every agent output is a *proposal* (a diff, a verdict, a backlog change, a decision). Proposals arrive as Agent API calls, already checked by the gateway for identity, engagement, permission, and scope (agent API design §2). The engine then validates them against schema, workflow guards, and policy, and applies their effects (§8). An agent that says "mark story 88 done" has asked; only the engine can do it.
+3. **I/O through ports, logic in the core.** The engine core never touches a socket, a file, a model, or a clock directly. It talks to *ports* (Agent API gateway, message bus, model router, sandbox pool, policy manager, repo, CI, clock, event store). Real adapters make it run the company; simulated adapters make it *simulate* the company (§12). The same code serves both.
 
 **Relationship to the driver** (monitor/driver design §4): the driver is the *host process*. It supervises sandboxes, runs the ceremony timer, accepts intake, and provides the real adapters. The engine is the *domain core* running inside it. The ceremony scheduler, intake gateway, and human relay become thin adapters that turn outside events into engine events.
 
@@ -38,7 +43,7 @@ Three properties define it:
    human inbox answers ─▶│                                              │
    CI / gate results ───▶│  ┌───────────┐ ┌───────────┐ ┌───────────┐ │
    job results ─────────▶│  │ org model │ │ work model│ │ workflow  │ │
-                         │  │ (§3)      │ │ (§4)      │ │ FSMs (§5) │ │
+   agent API calls ─────▶│  │ (§3)      │ │ (§4)      │ │ FSMs (§5) │ │
                          │  └───────────┘ └───────────┘ └───────────┘ │
                          │  ┌───────────┐ ┌───────────┐ ┌───────────┐ │
                          │  │decomposer │ │ scheduler │ │ effects   │ │
@@ -59,6 +64,8 @@ Three properties define it:
 
 The core consumes **events** (`job.returned`, `gate.passed`, `human.answered`, `timer.iteration_ended`, …) and emits **commands** (`dispatch_job`, `publish_record`, `commit_diff`, `request_human_decision`, …). Adapters carry out commands and report outcomes back as new events. That loop is the whole engine.
 
+Agent calls reach the engine only through the **Agent API gateway**, which has already checked identity, run state, engagement, permission, scope, and data class (agent API design §2.3). The **policy manager** in the driver derives and locks engagements (§8.4).
+
 ---
 
 ## 3. Org model
@@ -73,7 +80,7 @@ roles:
     prompt: agentPrompts/developer.jinja
     output_schema: schemas/developer.output.json
     instances: { min: 1, max: 4 }          # sandbox count, bounded by capacity (§7)
-    tools_allowed: []
+    # permissions: generated from config/raci.yaml into permissions.lock (agent API design §4)
     job_types:
       implement_task: { default_tier: T0, ladder: [T0, T1, T2, T3] }
     referrals:                              # §9: "not my call" routes to another role
@@ -98,7 +105,30 @@ roles:
       answer_referral:  { default_tier: T2, ladder: [T2, T3] }
     referrals:
       beyond_po_authority: executive_director
-  # … tester, security_reviewer, scrum_master, executive_director, client_communications
+  change_coordinator:
+    job_types:
+      cr_check:             { default_tier: T0, ladder: [T0, T1] }
+      release_assembly:     { default_tier: T0, ladder: [T0, T1] }
+      approval_package:     { default_tier: T0, ladder: [T0, T2] }
+      meeting_presentation: { default_tier: T0, ladder: [T0, T2] }
+      impact_summary:       { default_tier: T2, ladder: [T2, T3] }   # also release notes
+
+  knowledge_manager:
+    job_types:
+      kb_review:               { default_tier: T0, ladder: [T0, T2] }
+      kb_publish:              { default_tier: T0, ladder: [T0] }
+      gap_digest:              { default_tier: T0, ladder: [T0] }
+      lessons_followup:        { default_tier: T0, ladder: [T0, T2] }
+      curate_required_reading: { default_tier: T0, ladder: [T0, T2] }
+      kb_synthesis:            { default_tier: T2, ladder: [T2, T3] }   # writing or merging articles
+
+  client_communications:
+    job_types:
+      intake:   { default_tier: T3, ladder: [T3] }
+      converse: { default_tier: T3, ladder: [T3] }   # chat with the owner (console design §6)
+  # … tester, security_reviewer, scrum_master, executive_director
+  # Every role also has maintain_dashboard (T0; console design §7.3) and
+  # meeting_contribution (the role's default tier; knowledge design §7).
 ```
 
 ### 3.2 Job types separate *what* from *how hard*
@@ -122,10 +152,11 @@ Escalating a question about ambiguous acceptance criteria up the *tier* ladder j
 
 ```
 Portfolio
- └─ Epic                 (Lean business case; epic owner = Executive Director)
-     └─ Feature          (fits in one PI; benefit hypothesis; owned by Product Owner)
-         └─ Story        (fits in one iteration; acceptance criteria; owned by Product Owner)
-             └─ Task     (one job for one worker; must satisfy task_bounds — §6)
+ └─ Product              (each client product, plus the Console as Product 0 — console design §8)
+     └─ Epic             (Lean business case; epic owner = Executive Director)
+         └─ Feature      (fits in one PI; benefit hypothesis; owned by Product Owner)
+             └─ Story    (fits in one iteration; acceptance criteria; owned by Product Owner)
+                 └─ Task (one job for one worker; must satisfy task_bounds — §6)
 ```
 
 **Feature** is added between Epic and Story to align with SAFe (the full SAFe mapping is in the SAFe/PMO design, to follow). Epics, Features, and Stories are each either **business** or **enabler** (architecture, infrastructure, compliance, exploration). Enablers are how the Architect's runway work and the governance design's threat models (§9, PW.1) get into the backlog as real, scheduled work instead of side effects.
@@ -136,6 +167,7 @@ Portfolio
 @dataclass(frozen=True)
 class WorkItem:
     id: str                       # "story_88"
+    product: str                  # products[].id; capacity shares (§7.4)
     kind: Literal["epic", "feature", "story", "task"]
     nature: Literal["business", "enabler"]
     parent_id: str | None
@@ -178,10 +210,43 @@ Not everything is backlog. The engine tracks these as work items with their own 
 |---|---|---|
 | `escalation` | Any job trigger (§9) | Engine, per escalation design packet |
 | `decision` | PO / Architect / Exec Dir / human | Engine → canonical record |
-| `ceremony` | Iteration/PI timer (§10) | Scrum Master jobs |
+| `ceremony` | Iteration/PI timer (§10) | Scrum Master jobs; planning, retros, and reviews run as `meeting`s (§4.6) |
 | `change` | Change/config design §5 | Engine, per change lifecycle |
-| `human_request` | `request_human_decision` command | Engine + monitor inbox |
-| `incident` | Driver / monitor (service management design) | Engine |
+| `human_request` | `request_human_decision` command; also change and release approvals, risk renewals, pre-approval reviews | Engine + console inbox and the change approval meeting (§4.5) |
+| `incident` | Driver / monitor (service management design) | Engine; closing needs a linked or new knowledge article (§5.4) |
+| `conversation` | An owner message in the console chat (console design §6) | Engine; one `converse` job per owner message (§4.6) |
+| `meeting` | Ceremony timer, change coordinator, or the owner (knowledge design §7) | Engine as facilitator (§4.6) |
+| `lesson` | PIRs, retros, Inspect & Adapt (knowledge design §6) | Knowledge manager; verification checked by the engine (§4.6) |
+| `release` | Change coordinator (agent API design §5.3) | Engine; production approval by the owner (§5.4) |
+
+### 4.5 Owner requests
+
+A `human_request` is the only way the owner is asked for anything (monitor design §6). Its fields follow the service management contract (§3.2 of that doc). Three of them are computed by the engine, never by the agent that framed the question:
+
+| Field | Computed from |
+|---|---|
+| `urgency` (P1–P3) | The share of ready work the request blocks, and whether it's on the current PI's critical path (dependency graph) |
+| `impact_of_waiting` | Simulation mode (§12): items blocked, forecast delay per day of waiting |
+| `default_on_expiry.est_reversal_cost` | Simulation mode: the rework a later reversal would create |
+
+**Lifecycle:** `open → reminded → stale → resolved | parked | provisional`. Reminders, expiry, and reassessment are clock events (§10; service management design §3.3). While the company is paused, deadlines stop.
+- **Park** (the default on expiry): affected items stay `awaiting_human`; everything else continues.
+- **Provisional** (only for trigger types the owner has opted in): the recommended option is published as a decision with `status: provisional`, and every item built on it is tagged `depends_on_provisional: <request>`. If the owner later chooses differently, the engine publishes a superseding decision and creates rework for every tagged item.
+
+**One object, two places to answer.** Approval requests (production releases, system changes, pre-approval reviews) appear both in the console inbox and on the agenda of the next change approval meeting (change/config design §5.1). The agenda is a *view* over pending requests, so approving in either place resolves the same `human_request`. Nothing can be approved twice, or approved in one place while still waiting in the other. The inbox WIP limit (§7.1) counts requests, not places.
+
+### 4.6 Meetings, lessons, and conversations
+
+These three kinds get their own state machines, so they're scheduled, traced, replayed, and measured like the rest of the work.
+
+**Meetings** (knowledge design §7): `scheduled → in_session → concluded | abandoned`.
+- The engine facilitates. Each round leases one `meeting_contribution` job per participant, each at that participant's own tier and with its own need-to-know filter. A meeting ends at consensus, at `max_rounds`, or at its token budget; unresolved items go to their decision owner (RACI).
+- **Owner-attended meetings** (currently change approval) run **at the owner's pace, off the iteration clock**. Turns are leased only when the agenda moves or the owner asks something, and nothing times out to force progress. If the owner never opens the meeting, it's `abandoned` and its items stay in the inbox (§4.5).
+- If a participant's tier is down, the meeting pauses rather than continuing without that voice.
+
+**Lessons** (knowledge design §6): `captured → actioned → verified → closed`, or `rejected` with a reason. The knowledge manager owns the register. **The engine checks verification itself** at each iteration boundary, evaluating the lesson's metric condition against the metric registry (console design §7.1). An agent never declares a lesson learned. A new lesson that matches a closed one (FTS search) is flagged as a repeat and opens a problem record.
+
+**Conversations** (console design §6): `open → awaiting_reply → answered → closed`. Each owner message leases one Client Communications `converse` job. While paused, messages queue and the thread stays `awaiting_reply` (§10).
 
 ---
 
@@ -203,7 +268,7 @@ Not everything is backlog. The engine tracks these as work items with their own 
 
 ### 5.2 Transition authority
 
-Every transition names who may cause it and what guard must hold. Agents trigger transitions only indirectly, through proposals the engine accepts.
+Every transition names who may cause it and what guard must hold. Agents trigger transitions only indirectly, through proposals the engine accepts. The roles in `by:` are compiled from the RACI matrix into `permissions.lock` as allowed `item.transition` pairs (agent API design §5.1). The gateway rejects a disallowed request before the engine sees it, and the engine's guards still apply on top.
 
 ```yaml
 # workflow.yaml (excerpt)
@@ -232,6 +297,22 @@ A Tester "fail" is **rework**, not escalation (as the Tester prompt says). Rewor
                                               └──── exhausted ──▶ escalation (§9)
  poison (fails across all tiers) ──▶ dead_letter + incident
 ```
+
+### 5.4 Guards added by later designs
+
+```yaml
+# workflow.yaml (excerpt, continued)
+guards:
+  incident.close:        kb_article_linked or kb_draft_created            # knowledge design §4
+  problem.close:         known_error_article_updated and fix_verified     # knowledge design §4
+  lesson.close:          verification_passed                              # §4.6
+  cr.approve:            approver_is_accountable and approver != author   # agent API design §4.2
+  release.candidate:     all_changes_approved and all_changes_merged
+  release.to_production: owner_command or all_changes_preapproved_to_production   # change/config §4.3
+  meeting.conclude:      consensus or max_rounds or budget_exhausted
+```
+
+The pre-approval match itself is computed by the driver from the diff and gate results (change/config design §4.3); the engine consumes the resulting change class. `owner_command` means a console command behind the trusted confirmation dialog: no event an agent can produce satisfies it.
 
 ---
 
@@ -271,7 +352,7 @@ task_bounds:
 
 ### 7.1 Resources
 
-The engine schedules against four scarce resources. Each has one owner, and the engine asks rather than assumes:
+The engine schedules against six scarce resources. Each has one owner, and the engine asks rather than assumes:
 
 | Resource | Owner | Unit |
 |---|---|---|
@@ -279,6 +360,8 @@ The engine schedules against four scarce resources. Each has one owner, and the 
 | Sandbox instances | Process supervisor | Per-role `instances.max` |
 | Remote budget | Cost ledger (§13) | $ vs. daily/sprint/epic guardrails |
 | **Human attention** | Monitor inbox | Open `human_request` items |
+| Product capacity share | `portfolio.yaml` (console design §8.2) | Share of paid budget and local capacity per product (§7.4) |
+| Engagement budget | Each agent's locked engagement (agent API design §6) | Tokens and $ per iteration per agent instance (§8.4) |
 
 **Human attention has a WIP limit** (`human_inbox_wip`, default 3). When it's reached, Exec Dir jobs that would raise *another* human request are told so in their prompt context. They must decide within their authority, batch the request with an open one, or queue it at lower priority. This puts the escalation design's goal of reserving human attention into the scheduler instead of leaving it to prompt wording alone.
 
@@ -294,6 +377,15 @@ The ready queue is ordered by:
 
 Per state and per role, from `workflow.yaml` (e.g., `in_progress` ≤ number of developer instances; `in_review` ≤ 5). A full downstream state stops upstream dispatch, which keeps a slow Tester or Security Reviewer from building up a pile of unreviewed diffs.
 
+### 7.4 Portfolio shares and service inputs
+
+Four more inputs shape what the scheduler leases:
+
+- **Product capacity shares** (`portfolio.yaml`) are **ceilings with idle borrowing**. A product may exceed its share only while no other product has ready work waiting; the Console (Product 0) also needs a WSJF at or above its `wsjf_floor` (console design §8.2). A share never holds capacity idle.
+- **Service mode and breakers** (service management design §4.2): tiers whose breaker is open are removed from routing, and work that can't go elsewhere is parked, not failed. `budget_exhausted` removes the paid tiers.
+- **Model affinity:** among equally ranked jobs, prefer the model already loaded on the GPU, within a fairness window (default 5 minutes), because a switch costs a weight reload (service management design §7.3).
+- **Run state:** Start / Pause gates everything (§10). Paused, nothing is leased.
+
 ---
 
 ## 8. The job cycle
@@ -302,11 +394,12 @@ Per state and per role, from `workflow.yaml` (e.g., `in_progress` ≤ number of 
 
 Every agent invocation, for every role, follows the same cycle:
 
-1. **Lease:** the scheduler assigns a queued job to an idle sandbox of the right role and acquires resources (§7.1).
-2. **Assemble context:** the task payload, plus the agent's own `semantic_notes` retrieved by topic (data layer design §7.1), plus canonical records the broker has already delivered to that agent. **Never** anything the agent's need-to-know doesn't cover. Each segment is labeled with its origin and data class (governance design §7).
-3. **Render:** the prompt template at the **baseline** version (change/config design §3), with thresholds from `risk_tolerance.yaml`.
-4. **Route:** hand off to the router with job type, tier, data class, and size. The router picks the model (escalation design §6; governance design §5.2 ceiling check).
-5. **Validate:** check the output schema, then authority (can this role propose this effect?), then policy (bounds, data class, budget).
+0. **Bind:** only sandboxes bound to an active, locked engagement whose scope covers the job are eligible (§8.4).
+1. **Lease:** the scheduler assigns a queued job to an eligible sandbox of the right role and acquires resources (§7.1, §7.4).
+2. **Assemble context:** the task payload, plus the agent's own `semantic_notes` retrieved by topic (data layer design §7.1), plus canonical records the broker has already delivered to that agent, plus the procedure articles its engagement lists as required reading (knowledge design §5.3). **Never** anything the agent's need-to-know doesn't cover. Each segment is labeled with its origin and data class (governance design §7).
+3. **Render:** in order, the company directive, the **engagement summary** (policy, contract obligations, scope, out-of-scope), then the role template, all at the **baseline** version (change/config design §3), with thresholds from `risk_tolerance.yaml`. Rendering fails closed without a locked engagement.
+4. **Route:** the sandbox calls `model.complete` through the Agent API gateway. The router applies its pre-dispatch checks (run state, engagement, data-class ceiling, budget, breakers) and picks the model by the context-fit rule (escalation design §6).
+5. **Validate:** check the output schema, then authority (does the role's generated permission set include this effect?), then policy (bounds, data class, budget). An escalation or referral must carry `kb_checked` (§8.2).
 6. **Apply effects:** role-specific appliers (§8.3) turn the validated proposal into engine events and commands.
 7. **Write-back:** the agent's end-of-task note step (data layer design §6).
 8. **Release:** release resources, record cost (§13), emit `job.applied`.
@@ -329,6 +422,8 @@ The worker contract (escalation design §7) gains one field so agents can say *w
 
 `reason` is an enum defined per role in `org_chart.yaml` (the keys of `referrals`, plus the standard tier-escalation reasons). Free-text reasons are rejected as a schema failure.
 
+Escalation design v0.2 also adds `kb_checked`: whenever `escalation` is present, it lists the article IDs the agent considered in its mandatory knowledge search, or `none_applicable` with a reason (escalation design §4.5, §7).
+
 ### 8.3 Effect appliers
 
 | Role (job type) | Proposal | Engine effect |
@@ -342,6 +437,29 @@ The worker contract (escalation design §7) gains one field so agents can say *w
 | Tester | Verdict + failures | `in_test → done`, or rework with failures attached to the next Developer job |
 | Security Reviewer | Gate result | `gate.passed` / `gate.failed` / security-fast-path escalation |
 | Scrum Master | Ceremony summary, routed blockers | Board annotations only (can't change priority or state); blockers become referrals |
+| Change Coordinator | CR checks and impact, release candidate, approval package | `cr: proposed → assessed`; release candidate built (§5.4 guard); the package becomes a `human_request` and a change approval meeting agenda item (§4.5) |
+| Knowledge Manager | Review verdicts, publish decisions, gap digests, required-reading lists | Publish or return `kb.*` articles; the digest becomes knowledge work items; required-reading changes go to engagement templates as change proposals |
+| Any role (`meeting_contribution`) | Position, proposals, questions, objections, agreement | Appended to the meeting; may conclude an agenda item (§4.6) |
+| Any role (`maintain_dashboard`) | Dashboard spec changes, agent-defined metrics, commentary | A Console product change proposal (console design §7.3) |
+| Client Comms (`converse`) | Reply with metric-query results | Posted to the conversation; figures no query produced are flagged "unverified" (console design §6.3) |
+| Any role (write-back `kb_drafts`) | Knowledge article draft | A `kb.*` draft queued for the knowledge manager's review (knowledge design §4) |
+
+### 8.4 Engagements in the job cycle
+
+The engine never creates or locks an engagement; the driver's **policy manager** does (agent API design §6). The engine's part:
+
+1. At iteration start, and whenever the supervisor spawns a sandbox, the engine emits `engagement_required(assignment)`: role, instance, product(s), job types, iteration window.
+2. The policy manager derives the engagement from the approved template, validates it, and locks it; the sandbox then binds (`engagement.bind`). Only then does the sandbox become eligible for leases.
+3. At lease time, the engine checks that the engagement is still active and its scope covers the job: product, job type, topics, and remaining budget.
+
+| Event | Engine response |
+|---|---|
+| Engagement budget exhausted | Stop leasing to that instance; re-queue its jobs to another eligible instance, or park them |
+| Engagement expired (window ended) | Let the running job finish, then unbind; the next iteration's engagement is requested |
+| Engagement superseded (new version) | Drain, then rebind |
+| Engagement revoked | Leases expire immediately and jobs re-queue; the supervisor stops the sandbox |
+
+Engagements aren't work items; they're governance records under `engagement.*` (data layer design §5.3). Keeping their lifecycle in the driver keeps the engine pure domain logic.
 
 ---
 
@@ -366,6 +484,8 @@ The engine maps `(role, trigger/reason)` to an action. Agents never choose the d
 - An item can hold at most one open referral at a time.
 - The original job is parked in `blocked` with a pointer to the referral, and resumes automatically when the referral's answer is published.
 
+**Search first.** The gateway rejects `escalate` and `refer` calls unless a knowledge search preceded them, and the output must carry `kb_checked` (knowledge design §5.1). An escalation deflected by an existing article never reaches this table.
+
 ---
 
 ## 10. Time model
@@ -378,6 +498,8 @@ A simulated company doesn't work at human speed, and forcing it onto human sprin
 | **Program Increment** (human cadence) | 1 week (5 iterations) | PI planning review, System Demo, Inspect & Adapt, governance review (governance design §13) | Human + Exec Dir + Client Comms |
 
 `agile.yaml` sets both. The human-facing commitments in the service management design (report cadence, response expectations) run on the PI cadence and wall-clock time. Agent ceremonies run on iteration boundaries.
+
+**Ceremonies as meetings.** Planning, retros, incident reviews, and change reviews run as facilitated `meeting`s (§4.6); the daily standup stays a cheap status aggregation by the Scrum Master. **Owner-attended meetings** run off the iteration clock, at the owner's pace, and the change approval meeting is scheduled at least once per PI whenever approvals are pending (change/config design §5.1).
 
 **Clocks are a port.** The real adapter reads wall-clock time. The simulation adapter (§12) is a virtual clock that jumps straight to the next scheduled event, so simulating a quarter takes seconds.
 
@@ -418,6 +540,8 @@ The engine's system of record is an **append-only event log**. Every state in §
 | `episodic_log` / `semantic_notes` (data layer §3.2–3.3) | "What does this agent know?" | Bus delivery / agent write-back |
 | Audit log (escalation §8, governance §12) | "Prove what happened, tamper-evidently" | Audit writer, which consumes engine events + bus messages and hash-chains them |
 
+Data layer design §3.5 has the complete store list, including the file store and product repositories.
+
 ### 11.3 Replay
 
 Model outputs live in the log, so **replaying the log rebuilds any past state exactly without calling a model**. That supports:
@@ -448,7 +572,7 @@ tokens: { in: { median: 7800 }, out: { median: 1400 } }
 tester_first_pass_rate: 0.64
 ```
 
-There's one behavior model per `(role, job_type, tier)`. Before any history exists, the priors are rough guesses. After a few sprints they're fitted from real audit data.
+There's one behavior model per `(role, job_type, tier)`. Before any history exists, the priors are rough guesses. After a few sprints they're fitted from real audit data. Two more models feed forecasts of owner-facing work: meeting rounds-to-consensus per meeting type, and the owner's response time per request urgency, which drives `impact_of_waiting` (§4.5).
 
 ### 12.2 Uses
 
@@ -477,6 +601,9 @@ Every job posts cost entries to a **cost ledger**: tokens in and out, local GPU-
 - **Lean budget guardrails:** an epic or feature may carry `budget_usd`. At 80% the engine warns Exec Director; at 100% it stops scheduling *paid-tier* work on that item (local work continues) and raises a decision for Exec Dir, which may become a human request. This is where the escalation design's open `daily_spend_limit` question is implemented, one level down.
 - **Unit economics** for the monitor's cost dashboard (monitor design §5.8): cost per story point, per feature, and per tier resolution; the dollar cost of each escalation path; the cost of `data_class_ceiling` skips.
 - **Local isn't free.** GPU-seconds are tracked even though they cost nothing in dollars, because they're the throughput constraint. A T1 job that holds the GPU for 20 minutes has a real opportunity cost measured in blocked T0 work.
+- **Engagement budgets:** each agent instance's engagement carries a token and dollar budget per iteration (agent API design §6.1). The ledger debits it per job, and exhaustion stops leasing to that instance (§8.4).
+- **Product shares:** costs also roll up per product, so the capacity shares in `portfolio.yaml` can be checked against actual use (§7.4).
+- **Meeting cost per decision** is tracked per meeting type, so meetings that don't earn their tokens can be dropped (knowledge design §14).
 
 ---
 
@@ -492,6 +619,9 @@ Every job posts cost entries to a **cost ledger**: tokens in and out, local GPU-
 | Dependency cycle | Detected at task creation (graph check); the decomposition is rejected. |
 | System-wide stall | All ready work blocked on the human or budget → engine enters `idle_blocked`, the monitor shows why, and one consolidated human notification goes out (not one per item). |
 | Engine crash | Restart from the last snapshot + event log tail; in-flight leases expire and re-queue. The engine is a single writer, so there's nothing to reconcile. |
+| Engagement revoked or expired mid-job | Per §8.4: revoked → the lease expires and the job re-queues; expired → the job finishes, then the sandbox unbinds |
+| Meeting participant's tier down | The meeting pauses (§4.6) and resumes when the breaker closes |
+| Owner absent from a change approval meeting | The meeting is abandoned; its items stay in the inbox, unapproved (§4.5) |
 
 ---
 
@@ -502,9 +632,9 @@ Every job posts cost entries to a **cost ledger**: tokens in and out, local GPU-
 3. Engine dispatches Exec Dir (`set_vision`). Exec Dir judges the gap to be `ambiguous_original_intent` → `human_request` → Client Comms frames three options → monitor inbox.
 4. Meanwhile, Exec Dir's vision for everything *not* affected by the gap is published. PO refines epics → features → stories. Stories touching checkout are parked `awaiting_human`; the rest proceed.
 5. Architect (`decompose_story`, T0) splits `story_12` into three tasks. One exceeds `max_relevant_files`, so the engine rejects it with specifics. The re-split passes; tasks go `draft → ready`.
-6. The scheduler leases `task_31` to `developer/sbx-14` (qwen36). The diff is returned; the driver verifies scope and commits to `task/task_31`. CI runs: green.
+6. The scheduler leases `task_31` to `developer/sbx-14`, which is bound to its locked engagement for this iteration (§8.4); the router picks `qwen36`. The diff is returned; the driver verifies scope and commits to `task/task_31`. CI runs: green.
 7. Security Reviewer passes; Tester fails one case → rework with failures attached → Developer fixes → Tester passes.
-8. The change class is computed as **standard** → driver merges. `task_31 → done`. Cost ledger: 3 T0 jobs, 0 T1, $0.00, 11 GPU-minutes.
+8. The change matches the `code-within-task-scope` pre-approval entry, so its class is **standard** → driver merges. `task_31 → done`. Cost ledger: 3 T0 jobs, 0 T1, $0.00, 11 GPU-minutes.
 9. The human answers the inbox question. The decision record is published; parked checkout stories return to `ready` automatically.
 
 Every step above is an event with `correlation_id: trc_5d02`. The monitor can show it as one continuous trace, and replay can rebuild any intermediate board.
@@ -526,35 +656,41 @@ agentco/
     effects/              # one applier per role output type
     escalation.py         # trigger → tier escalation / referral (§9)
     ledger.py             # cost ledger + budget guardrails
+    requests.py           # human_request lifecycle, urgency, provisional decisions (§4.5)
+    meetings.py  lessons.py  conversations.py   # §4.6
+    portfolio.py          # products and capacity shares (§7.4)
     events.py, projections.py, replay.py
   ports/                  # interfaces the core depends on
   adapters/
+    gateway/              # Agent API gateway: identity, engagement, permission, scope checks
     bus/                  # orchestration/message_bus.py + broker
     models/               # model_backends/router.py, llama_cpp, opencode_cli, claude_cli
     sandbox/  repo/  ci/  clock/  store/
     sim/                  # stub agents, virtual clock, behavior models (§12)
-  driver/                 # process_supervisor, ceremony_scheduler, intake_gateway, human_relay
+  driver/                 # process_supervisor, ceremony_scheduler, intake_gateway, human_relay,
+                          # policy_manager (engagements), notification adapter
   monitor/                # FastAPI backend + static frontend
   compliance/             # audit_log writer, control tagging, chain verification
 agentPrompts/  schemas/  evals/  baselines/
 config/  org_chart.yaml  models.yaml  task_bounds.yaml  workflow.yaml  agile.yaml
-         need_to_know.yaml  policy/
+         need_to_know.yaml  raci.yaml  portfolio.yaml  engagements/
+         policy/  (risk_tolerance, preapproval, owner_meetings, service_levels, …)
 ```
 
 ---
 
 ## 17. Build phases
 
-The engine is buildable, and useful, before any model is connected:
+The engine is buildable, and useful, before any model is connected. Phase contents follow `roadmap.yaml`, which is authoritative; this table summarizes it.
 
 | Phase | Delivers | Proves |
 |---|---|---|
-| **0 — Sim core** | Engine core, event store, workflow, scheduler, sim adapters, CLI to run a simulated backlog | State machines and config don't deadlock; the forecasting loop works end-to-end at zero cost |
-| **1 — One real worker** | Real router (T0 only), one Developer + one Tester sandbox, driver commits, local CI on a toy repo | The job cycle, scope check, rework loop, and cost ledger on real output |
-| **2 — The team** | PO (T2), Architect, Security Reviewer, broker ACLs, referrals | Decomposition under bounds; referral vs. tier escalation |
-| **3 — The top** | Exec Dir and Client Comms (T3), human relay, monitor inbox and boards | The human loop, end to end |
-| **4 — Governance** | Baselines, change records, eval gate, audit hash chain, compliance dashboard | The governance and change/config designs, enforced |
-| **5 — Scale** | PI cadence, multi-instance roles, calibrated simulation forecasts | SAFe/PMO operation |
+| **0 — Sim core** | Engine core, event store and replay, workflow, scheduler, sim adapters and CLI; config loader with the context-fit check; RACI matrix and permission generation; AgentCo repo CI | State machines, config, and permissions are consistent and don't deadlock, at zero cost |
+| **1 — One real worker** | Agent API gateway; policy manager and engagement lock; Start / Pause; encrypted stores; T0 router; Developer + Tester sandboxes; driver as sole committer; local CI on a toy repo; cost ledger and basic audit | The job cycle, scope check, rework loop, and "no policy, no inference" on real output |
+| **2 — The team** | PO (T2), Architect, Security Reviewer with scanners; egress controls before the first remote tier; broker ACLs and referrals; knowledge base, knowledge manager, and search-before-escalate; internal mail; pre-approval catalog | Decomposition under bounds; referral vs. tier escalation; knowledge deflection |
+| **3 — The top** | Exec Dir and Client Comms (T3); human relay and the request lifecycle; alerts and phone push; change coordinator and release train; meetings and the owner-attended change approval meeting; document store and deliverables; per-product capacity shares | The human loop, end to end, including change approval |
+| **4 — Governance** | Baselines and drift, change records, eval gate and canaries, audit hash chain, backups and degraded modes, traceability graph and lessons control | The governance, change/config, and knowledge designs, enforced |
+| **5 — Scale** | PI cadence, multi-instance roles, calibrated forecasts, memory compaction | SAFe/PMO operation |
 
 ---
 
@@ -577,4 +713,5 @@ The engine is buildable, and useful, before any model is connected:
 - **Who decomposes when the Architect is busy.** Decomposition is on the critical path for every story. If it becomes a bottleneck even at T0, a separate `tech_lead` role, or multiple Architect instances for decomposition only, may be needed.
 - **Engine and audit log merger.** The event log and audit log are both append-only with similar content. Merging them into one hash-chained store is simpler but mixes operational and compliance retention rules. Kept separate for v0.1.
 - **Behavior-model fidelity.** Simulated outcomes are sampled independently per job; real failures are correlated (a bad story produces several failing tasks). A hierarchical model (per-story difficulty) is the likely next step.
-- **Multiple products at once.** The work model assumes one portfolio. Running several client products concurrently needs per-product resource shares in the scheduler and per-tenant data classes (governance design §15).
+- **Multiple products at once.** Per-product capacity shares are now in the scheduler (§7.4; `feat-p3-multiproduct`). Per-tenant data classes for several *clients* remain future work (`epic-multi-client`; governance design §15).
+- **Owner-meeting pacing.** Owner-attended meetings run off the clock, so their duration can't be forecast from agent behavior alone. Owner response-time models (§12.1) will show whether change approval needs a scheduled slot rather than an on-demand meeting.

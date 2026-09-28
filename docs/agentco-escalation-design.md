@@ -73,6 +73,7 @@ Tiers are set **per job type**, not per role, in `org_chart.yaml` (core engine d
 | Architect | `decompose_story` → **T0**; `decide`, `review_design` → **T1** | Decomposition is on every story's critical path, so it has to be cheap; hard technical decisions are exactly the "one hard question" T1 is for |
 | Product Owner | `refine_backlog`, `answer_referral` → **T2** | Prioritization and story-writing benefit from stronger reasoning; PO decisions ripple into many tasks |
 | Change Coordinator | CR checks, release assembly → T0; release notes and impact summaries → T2 | Prepares change paperwork; never approves (agent API design §5.3) |
+| Knowledge Manager | review, publish, gap digest, lesson follow-up → T0; `kb_synthesis` → T2 | Knowledge upkeep is continuous and mostly mechanical; writing or merging articles needs stronger prose (knowledge design §4.1) |
 | Executive Director | decisions → **T3 (Opus)** | Vision, cross-epic tradeoffs, and the call on whether the human is needed |
 | Client Communications | intake, framing, reports, `converse` → **T3 (Opus)** | Everything the human reads comes from this role, so it must be the most reliable voice in the system (§5) |
 

@@ -131,7 +131,18 @@ Following KCS, knowledge is captured **as part of resolving things**, not afterw
 - **Reuse improves articles:** every reuse increments `reuse_count`. A reuser who finds an article wrong or incomplete **flags** it, which reopens review.
 - **Retire deliberately:** an article unused for two PIs, or superseded, is retired with a link to its replacement, never deleted.
 
-**RACI** (agent API design §4.4): the resolving role is **R** for authoring; the Scrum Master, as knowledge manager, is **A** for publishing; the Architect is **C** on technical accuracy. Articles that describe policy or change governance also need the owner's approval.
+**RACI** (agent API design §4.4): the resolving role is **R** for authoring; the **knowledge manager** is **A** for publishing; the Architect is **C** on technical accuracy. Articles that describe policy or change governance also need the owner's approval.
+
+### 4.1 The knowledge manager
+
+Knowledge upkeep is continuous work, so it has a dedicated role (owner decision, 2026-09-27), `knowledge_manager`, T0 by default and T2 for writing or merging articles:
+- **Review and publish:** works the draft queue, checks structure and need-to-know topics, consults the Architect on technical accuracy, and publishes or returns drafts.
+- **Gap digest:** turns escalations after a knowledge-base miss (§5.1) into knowledge work items.
+- **Curation:** merges duplicates, flags stale articles, retires unused ones with a link to their replacement.
+- **Required reading:** keeps each role's procedure list current and proposes changes to the engagement templates that carry it (agent API design §6).
+- **Lessons:** owns the lessons register (§6) and follows each lesson through to verification.
+
+This separates duties: the Scrum Master runs the retros that *raise* lessons, and the knowledge manager *closes* them, but only after the engine confirms verification (core engine design §4.6).
 
 ---
 
@@ -173,7 +184,7 @@ lesson_id: les-0019
 statement: "Decomposition exceeded max_relevant_files for migration stories 4 times in PI 3"
 derived_from: [pir_0007, retro_it41]
 category: process            # process | technical | tooling | governance | communication
-owner_role: scrum_master
+owner_role: knowledge_manager
 action: { kind: change_proposal, ref: chg_0122 }   # or enabler story, or article
 verification: { metric: "role.architect.decomposition_rejections", expect: "≤ 1 per PI for 2 PIs" }
 state: actioned              # captured → actioned → verified → closed   (or: rejected, with reason)
@@ -343,7 +354,7 @@ New presentation pages (console design §5): **Knowledge** (search, article view
 | Document | Change |
 |---|---|
 | Service management design §12–§14 | Known-error DB = known-error articles; runbooks = runbook articles; improvement register gains the lessons view; incident closure guard (reuse or capture) |
-| Core engine design §4.4, §10 | Work kinds `meeting`, `lesson`; ceremonies run as meetings; incident-closure guard in `workflow.yaml` |
+| Core engine design §4.4, §10 | Work kinds `meeting`, `lesson`; ceremonies run as meetings; incident-closure guard in `workflow.yaml` — **done in core engine design v0.2** |
 | Data layer design §5.1 | Topics `kb.*`, `mail.*`, `meeting.*`, `file.*` with classes — **done in data layer design v0.2** |
 | Agent API design §3 | `kb.*`, `mail.*`, `meeting.*`, `file.*` verbs and `kb_checked` on escalation (listed there) |
 | Change/config design §13 | Change failure rate computed from confirmed `caused_by` links |

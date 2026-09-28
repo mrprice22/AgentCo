@@ -408,7 +408,7 @@ items:
     product: agentco
     group: design-docs
     phase: design
-    state: ready
+    state: in_progress
     owner_role: bootstrap
     title: "Apply outstanding cross-document changes to the newer design docs"
     wsjf: { business_value: 5, time_criticality: 8, risk_reduction: 8, job_size: 5 }
@@ -421,8 +421,9 @@ items:
     product: agentco
     group: design-docs
     phase: design
-    state: ready
+    state: done
     owner_role: bootstrap
+    date: "2026-09-27"
     title: "Core engine design: console job types, human_request fields, service inputs"
     size_points: 3
     acceptance_criteria:
@@ -627,7 +628,7 @@ items:
     product: agentco
     group: design-docs
     phase: design
-    state: ready
+    state: in_progress
     owner_role: bootstrap
     title: "Apply Agent API and knowledge/collaboration changes to the earlier docs"
     wsjf: { business_value: 5, time_criticality: 8, risk_reduction: 8, job_size: 5 }
@@ -640,8 +641,9 @@ items:
     product: agentco
     group: design-docs
     phase: design
-    state: ready
+    state: done
     owner_role: bootstrap
+    date: "2026-09-27"
     title: "Core engine: engagements, change coordinator, meetings, lessons"
     size_points: 3
     acceptance_criteria:
@@ -1028,6 +1030,24 @@ items:
       - "Modes: CR completeness check, impact summary, release assembly, approval package, meeting presentation"
       - "No approve verb anywhere in its output contract; schemas/change_coordinator.output.json added"
     source: ["docs/agentco-agent-api-policy-design.md §5.3"]
+
+  - id: story-knowledge-manager-prompt
+    kind: story
+    nature: enabler
+    parent: feat-prompts-new-modes
+    product: agentco
+    group: prompts
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "knowledge_manager role template"
+    size_points: 3
+    depends_on: [dec-knowledge-manager-role]
+    acceptance_criteria:
+      - "agentPrompts/knowledge_manager.jinja includes the directive and engagement blocks"
+      - "Modes: review, publish, gap digest, lesson follow-up, required-reading curation"
+      - "schemas/knowledge_manager.output.json added"
+    source: ["docs/agentco-knowledge-collaboration-design.md §4.1"]
 
   - id: feat-prompts-dedupe
     kind: feature
@@ -1573,6 +1593,7 @@ items:
     owner_role: bootstrap
     title: "Knowledge base: articles, FTS5 search, kb verbs, search before escalating"
     wsjf: { business_value: 8, time_criticality: 3, risk_reduction: 8, job_size: 5 }
+    description: "Includes the knowledge_manager role: review/publish queue, gap digest, curation, required reading, lesson follow-up."
     source: ["docs/agentco-knowledge-collaboration-design.md §2", "docs/agentco-knowledge-collaboration-design.md §5"]
 
   - id: feat-p2-mail
@@ -2658,3 +2679,20 @@ items:
     question: "Route them to the Executive Director, or run a second Architect instance?"
     notes: "Decide from CR volume once phase 2 runs."
     source: ["docs/agentco-agent-api-policy-design.md §11"]
+
+  - id: dec-knowledge-manager-role
+    kind: decision
+    product: agentco
+    group: decisions
+    phase: p2
+    state: done
+    owner_role: human
+    title: "Add a knowledge_manager agent role?"
+    question: "Give knowledge upkeep and lessons follow-up a dedicated role instead of the Scrum Master?"
+    options:
+      - { id: a, label: "Add knowledge_manager (T0; T2 for article synthesis)" }
+      - { id: b, label: "Keep the duties with the Scrum Master" }
+    recommended: a
+    resolution: "Yes (option a), folded into the core engine v0.2 change."
+    date: "2026-09-27"
+    source: ["owner suggestion 2026-09-27", "docs/agentco-knowledge-collaboration-design.md §4.1"]
