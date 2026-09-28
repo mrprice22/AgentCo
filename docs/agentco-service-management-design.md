@@ -221,7 +221,7 @@ The engine exposes a single `service_mode` visible on every monitor page. Mode c
 | **remote_down** (both) | Both breakers / connectivity probe | Local-only operation: bounded T0/T1 work continues; referrals and decisions park; human input is received and acknowledged by template, and queued. |
 | **budget_exhausted** | Cost ledger | Behaves like `remote_down` for paid tiers, but the cause is policy, so it's reported as a decision for the human (raise the budget or wait), not as an incident. |
 | **monitor_down** | Driver health check | Engine continues; human answers impossible; operational alerts still sent via the notification adapter. |
-| **paused** | Kill switch | Nothing dispatches; state is preserved; resumes exactly where it stopped. |
+| **paused** | Owner's Start / Pause control, or an automatic Sev1 pause | Nothing dispatches and no model is called; business clocks and human-request deadlines stop; resumes exactly where it stopped. |
 
 ### 4.3 T3 down: no failover of authority
 
@@ -323,7 +323,7 @@ If the driver process dies, nothing inside AgentCo can send an alert. An **exter
 
 ### 6.5 Notification adapter
 
-This resolves the notification-delivery question from monitor design v0.1 (now monitor design §4.8): a driver-owned adapter with pluggable channels, such as a desktop toast (only useful when at the PC), email, or a self-hosted push service for phone notifications. At least one channel that reaches the human **away from the PC** is required to meet SLA-1/SLA-2. The chosen channel is a supplier decision if it's external, and alert content is Internal-class at most. Alerts carry counts and states, never task content.
+This resolves the notification-delivery question from monitor design v0.1 (now monitor design §4.8): a driver-owned adapter. **Owner decision (2026-09-27):** push notifications to the owner's phone, mirrored as an alert with its action in the console. Phone push is the channel that meets SLA-1/SLA-2 away from the PC. A notification carries a link to act in the console, never the action itself. The chosen channel is a supplier decision if it's external, and alert content is Internal-class at most. Alerts carry counts and states, never task content.
 
 ---
 
@@ -532,9 +532,9 @@ New or extended views (monitor design §5):
 
 ## 18. Open questions / follow-ups
 
-- **Notification channel:** which channel reaches the human away from the PC? A self-hosted push service keeps alert content on infrastructure the human controls; email is simpler but is another supplier.
+- **Notification channel:** resolved by the owner (2026-09-27): phone push plus a console alert (§6.5).
 - **Explicit T3 delegation during long outages** (§4.3): useful, or a dangerous escape hatch? Not in v0.1.
 - **Provisional defaults** (§3.4): off everywhere by default. Whether to enable them for `ambiguous_original_intent` is best decided after seeing real stale-request data for a few PIs.
 - **Default values:** every OLA and SLO in §2 is a starting guess and should be recalibrated from Phase 1 data. The first benchmark run (§7.2) replaces the capacity guesses.
-- **Offsite backup destination and key custody** (§8.2): not chosen yet.
+- **Offsite backup destination and key custody** (§8.2): the owner is considering SpacetimeDB. It's a database rather than blob storage, so an evaluation spike is on the roadmap: backups would be encrypted client-side and chunked before upload, and key custody is still open.
 - **Business hours:** a single human's calendar is simple; if AgentCo ever serves more than one stakeholder, urgency and response windows need a per-stakeholder dimension.

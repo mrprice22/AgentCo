@@ -91,7 +91,7 @@ It keeps the component vocabulary too: `system-ui` 14px/1.45, 6px radii, `.badge
 ```
 ┌──────────────────────────── browser: console origin (core) ─────────────────────────────┐
 │ ┌───────────────────────── CORE SHELL (human-approved code only) ──────────────────────┐ │
-│ │ service-mode banner · navigator frame · tab bar · who-bar · kill switch               │ │
+│ │ service-mode banner · navigator frame · tab bar · who-bar · start/pause               │ │
 │ │ PROTECTED PAGES: Inbox · Decision log · Approvals · Changes & baselines · Audit ·     │ │
 │ │                  Compliance · Company scorecard · Settings · Users                    │ │
 │ │ TRUSTED CONFIRMATION DIALOG (the only UI that can send a write command)               │ │
@@ -147,7 +147,7 @@ Some pages are where the human decides things or checks the company's honesty. T
 - **Approvals:** system changes, production deployments, risk acceptances
 - **Changes & baselines**, **Audit log**, **Compliance**
 - **Company scorecard:** the canonical metrics the human uses to judge the company (§7.2)
-- **Settings**, **Users**, the kill switch
+- **Settings**, **Users**, the Start / Pause control
 
 Protected pages still use the shared tokens and shell, so they look like the rest of the console. They just change on a different schedule, by a different author.
 
@@ -166,8 +166,8 @@ Same model as `roadmap_auth.py`: capabilities as a data table, roles as sets of 
 | `approve_change` | System change approvals (re-auth) |
 | `accept_risk` | Risk acceptances and renewals (re-auth) |
 | `adopt_console` | Adopting a console preview release / reverting (§8.4) (re-auth) |
-| `pause` | Kill switch |
-| `resume_revert` | Resume, revert baseline (re-auth) |
+| `run_control` | Start / Pause the business simulation; pause a role or tier |
+| `resume_revert` | Resume after an automatic Sev1 pause, revert baseline (re-auth) |
 | `what_if` | Running simulation scenarios |
 | `personal_dashboards` | Creating and editing the account's own dashboards (§7.5) |
 | `audit_view` | Audit log and compliance evidence |
@@ -180,6 +180,8 @@ Same model as `roadmap_auth.py`: capabilities as a data table, roles as sets of 
 | `auditor` | `audit_view` plus a **redacted projection** of the rest (no raw client communication), served as a *different document*, per the NWN `public` lesson |
 
 v0.1 has one real user. The table exists so that adding a second one is a data change rather than a rewrite, which is what NWN learned when its editor went from "LAN-only, no auth" to "internet-reachable, several users."
+
+**Sign-in (owner decision, 2026-09-27):** admin-role credential sign-in, the same pattern as the NWN server's `roadmap_auth.py`: accounts created from a shell on the host, password plus session cookie, capabilities by role, and the same login in front of the Cloudflare Tunnel for remote access. Re-authentication for high-impact verbs still applies.
 
 ---
 
@@ -209,7 +211,7 @@ The navigator follows NWN's shape: sections of one-link-per-line entries, filter
 
 ### 5.2 The bootstrap backlog: `roadmap.yaml`
 
-Until the engine exists, the backlog lives in [`roadmap.yaml`](roadmap.yaml) at the repo root, in the NWN `roadmap.yaml` tradition: stable IDs, groups, `notes`/`impl_notes`, and `date`/`commit` on shipped items. Its schema *is* the engine's work model (core engine design §4): epics, features, stories, tasks, and decision items, using the engine's state names. So the console's first page can be built before the engine (roadmap item `feat-ca-roadmap-board`):
+Until the engine exists, the backlog lives in [`roadmap.yaml`](../roadmap.yaml) at the repo root, in the NWN `roadmap.yaml` tradition: stable IDs, groups, `notes`/`impl_notes`, and `date`/`commit` on shipped items. Its schema *is* the engine's work model (core engine design §4): epics, features, stories, tasks, and decision items, using the engine's state names. So the console's first page can be built before the engine (roadmap item `feat-ca-roadmap-board`):
 - the Backlog board uses `meta.board_lanes`
 - the Portfolio Kanban uses `meta.portfolio_lanes`
 - decision items render like inbox entries
@@ -252,7 +254,7 @@ Typing "approve change 42" or "deploy it" in chat **never** approves or deploys 
 
 - **Latency:** the driver sends a templated "received" acknowledgment immediately (service management design §2.3), and the UI shows *Client Communications is drafting…*. The T3 OLA is ≤ 3 min p90; typical replies are faster.
 - **Threads:** each thread is a work item (`conversation`) with a correlation ID. Threads are listed, searchable, and linked from the items they touched.
-- **Cost:** every thread shows its cost, and chat draws on a separate `chat` budget line in `risk_tolerance.yaml` (default: a daily cap). When the cap is reached, the chat says so and offers the deterministic pages instead.
+- **Cost:** every thread shows its cost. There's no separate chat budget (owner decision, 2026-09-27). The owner controls spend with the business simulation's **Start / Pause** button (monitor design §4.2). While paused, no model is called; chat messages queue with an acknowledgment and are answered after Start.
 - **During `t3_down`:** the chat shows the service mode and queues messages, which are answered on recovery. It never falls back to a lower-tier model (service management design §4.3).
 - **Rendering:** reply text is rendered through a sanitizing allow-list (the same idea as NWN's rich-text whitelist for `notes`): basic formatting, internal deep links (`/#…`), and metric widgets only. There's no raw HTML and no external links unless allow-listed. Agent-authored content is framed with the `--agent-authored` border.
 
@@ -488,5 +490,4 @@ The company can't build the console it needs in order to run. So:
 - **Is a UX role needed?** UI design quality from T0 local models may be weak. Options: route `implement_ui_task` to T2 by default, add a `ux_designer` role (T2) that produces page specs and HTML mockups the human reviews in preview, or rely on the human's *Reject with note* loop. Measure adoption and reject rates first (§8.5).
 - **Sandbox friction:** a `postMessage` bridge adds a layer every page must go through. If it slows development too much, the fallback is a same-origin presentation with a strict Trusted Types policy. That's weaker and would need its own risk acceptance.
 - **Chart library choice** and whether the charting wrappers belong in the trusted core, so metric rendering is identical everywhere, or in presentation.
-- **Chat budget default:** how much Opus conversation per day is worth it. Start small and use the cost view to calibrate.
 - **Upstreaming:** improvements the company makes to the shared shell style could flow back to the NWN editor. That's a manual, human-driven sync (the repos stay independent, §2.3).

@@ -218,7 +218,7 @@ A passing prompt or model change first runs on a subset of work: one of N sandbo
 
 ### 8.1 Repositories
 
-Each client project gets its **own product repository**, separate from the AgentCo repo. Hosting a local git server on the LAN keeps Internal/Confidential code on-network (governance design §5). A remote host is a supplier decision like any other.
+Each client project gets its **own product repository**, separate from the AgentCo repo. Hosting a local git server on the LAN keeps Internal/Confidential code on-network (governance design §5). A remote host is a supplier decision like any other. Decision (2026-09-27): GitHub private repositories (§16).
 
 ### 8.2 Agents never run git
 
@@ -355,5 +355,5 @@ New or extended views in the monitor (monitor design §5):
 
 - **CI resource budget:** how much CPU can CI take without starving llama.cpp's offloaded layers needs measuring alongside the open GPU-concurrency benchmark (escalation design §9).
 - **Eval suite size:** how many cases per role, and runs per case, give a stable pass-rate signal on nondeterministic local models is unknown. Start at ~20 cases × 5 runs per role and adjust.
-- **Product repo hosting:** a local git server (e.g., Gitea) keeps code on the LAN; GitHub is simpler but is a supplier decision with a data-class ceiling.
+- **Product repo hosting:** decided 2026-09-27 (the owner asked for a recommendation): **GitHub private repositories**, which the owner already uses. Product code is Internal-class, and Confidential material never goes into a repository. A local Gitea remains the fallback if a client ever requires on-network code.
 - **Canary for T3 prompts:** Executive Director and Client Comms run as single instances, so canaries by sandbox don't apply. Shadow mode (run the new prompt alongside and compare outputs without acting on them) doubles T3 cost for the canary period. That's probably worth it, but it's a budget decision.

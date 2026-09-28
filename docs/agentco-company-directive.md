@@ -1,7 +1,7 @@
 # AgentCo — Company Directive (Mission & Operating Principles)
 
 **Design document v0.2** · **Directive text v1.1** (v1.1 adds D13)
-**Scope:** The one set of instructions every agent receives, whatever its role, tier, or task: who AgentCo is, what it's for, the thirteen principles every role works by, and what wins when instructions conflict. This document explains the directive for humans: the reasoning behind each principle, what actually enforces it, and how the directive itself is delivered, tested, and changed. The agent-facing text lives in [`agentPrompts/_company_directive.jinja`](agentPrompts/_company_directive.jinja) and is the canonical wording.
+**Scope:** The one set of instructions every agent receives, whatever its role, tier, or task: who AgentCo is, what it's for, the thirteen principles every role works by, and what wins when instructions conflict. This document explains the directive for humans: the reasoning behind each principle, what actually enforces it, and how the directive itself is delivered, tested, and changed. The agent-facing text lives in [`agentPrompts/_company_directive.jinja`](../agentPrompts/_company_directive.jinja) and is the canonical wording.
 
 ---
 

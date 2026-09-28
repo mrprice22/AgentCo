@@ -381,6 +381,8 @@ A simulated company doesn't work at human speed, and forcing it onto human sprin
 
 **Clocks are a port.** The real adapter reads wall-clock time. The simulation adapter (§12) is a virtual clock that jumps straight to the next scheduled event, so simulating a quarter takes seconds.
 
+**Run state.** The owner's **Start / Pause** control (monitor design §4.2) gates the whole company: while paused, the scheduler leases nothing, no model is called, and the iteration and PI clocks stop. A naming note: the owner calls running the company *the business simulation*. That's the real, model-backed run. *Simulation mode* (§12) is the separate forecasting sandbox with stub agents; it never calls a model and isn't affected by Start / Pause.
+
 ---
 
 ## 11. State, events and replay

@@ -7,7 +7,7 @@ Usage:
 Exit status is 1 when any error is found, 0 otherwise. Warnings never fail.
 Requires PyYAML (pip install pyyaml).
 
-The rules mirror agentco-core-engine-design.md §4 (work model, Definition of
+The rules mirror docs/agentco-core-engine-design.md §4 (work model, Definition of
 Ready) and the schema documented in the roadmap.yaml header.
 """
 from __future__ import annotations

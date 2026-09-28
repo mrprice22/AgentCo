@@ -372,5 +372,5 @@ This isn't a formal baseline selection (AgentCo is a single-operator system with
 
 - **T2 ceiling:** whether DeepSeek-V4-pro via OpenCode can be raised above Internal depends on the supplier assessment. Until then, Confidential work skips T2, and the cost impact of that should be measured.
 - **Effectiveness of provenance labeling on small local models** is unproven; the injection eval suite should measure it before relying on it for anything.
-- **Data-at-rest encryption** for SQLite stores (SC-28): OS-level disk encryption may be enough for a single host; not yet decided.
+- **Data-at-rest encryption** (SC-28): decided 2026-09-27 (the owner had no preference). Use Windows Device Encryption if this Windows 11 Home host supports it, otherwise SQLCipher per store. Confirming support needs an elevated prompt (roadmap `story-check-device-encryption`).
 - **Multi-client use:** if AgentCo ever builds for more than one client, classification needs a per-client dimension (tenant isolation), which this version doesn't model.

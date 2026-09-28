@@ -1,6 +1,6 @@
 # AgentCo — Monitor/Driver Design
 
-**Design document v0.2**
+**Design document v0.3**
 **Scope:** The one component in this system that is *not* an agent: the process the human actually runs, watches, and occasionally talks back to. Covers:
 - how it hosts the core engine and supervises agent sandboxes
 - how it controls configuration, commits, and releases
@@ -12,6 +12,7 @@
 |---|---|
 | v0.1 | Original design: driver/monitor split, views, human decision flow, roadmap edits, GPU contention view, LAN security notes |
 | v0.2 | Integrates the core engine, governance, change/config, service management, and company directive designs. The driver now hosts the engine, owns baselines, commits, CI, alerts, and backups. The monitor gains service, change/config, incident, and compliance views, an expanded inbox, trace/replay, and authenticated writes. Resolves v0.1's open questions on notifications, auth, and historical replay. |
+| v0.3 | Owner decisions (2026-09-27): Start/Pause run control for the business simulation (replaces any chat budget), phone push notifications, admin credential sign-in. Sandboxes spawn unbound until their engagement is locked (agent API design). |
 
 ---
 
@@ -119,10 +120,10 @@ The driver is the host process for the engine core. It provides the real adapter
 `driver/process_supervisor.py` owns the lifecycle of every agent sandbox process:
 
 - **Starts sandboxes** per the org chart's `instances` range for each role (core engine design §3.1). How many run at once is decided by the engine's scheduler against capacity (core engine design §7), not by the supervisor. This resolves v0.1's open question on multi-sandbox scheduling.
-- **Assigns identity:** binds each sandbox's channel to a fixed `sandbox_id` / role / instance / tier, which the bus stamps onto every message (governance design §6.1).
+- **Assigns identity:** binds each sandbox's channel to a fixed `sandbox_id` / role / instance / tier, which the bus stamps onto every message (governance design §6.1). Sandboxes start **unbound** and can make no model call until their engagement is locked and bound (agent API design §6.4).
 - **Health checks** via heartbeat. A crashed sandbox is restarted; its leased job expires and re-queues (core engine design §14). Task state lives in the event log, not the sandbox, so a restart loses no work.
 - **Exposes state** per agent (`running | idle | restarting | crashed | held`). **Held** means baseline drift was detected for that role's prompt or model, so no dispatches go to it until the human resolves the drift (change/config design §3.2).
-- **Owns the kill switch:** "pause all," "pause role X," "pause tier X," and "resume." It's reachable only from an authenticated monitor session, never from an agent (no agent has a tool that touches the supervisor). Pause is deliberately low-friction; resume requires re-authentication (§10.2).
+- **Owns run control:** the owner's **Start / Pause** button for the whole business simulation (owner decision, 2026-09-27), plus targeted "pause role X" and "pause tier X". It's reachable only from an authenticated console session, never from an agent (no agent has a verb that touches the supervisor). **Paused means no job is leased and no model is called anywhere, chat included.** That's the owner's cost control, in place of a chat budget. While paused, iteration and PI clocks and human-request deadlines stop, because nothing is waiting on the owner. Operational schedules (backups, drift checks, the watchdog) keep running. Start after an owner pause needs only an active session; resuming after an automatic Sev1 pause requires re-authentication (§10.2).
 
 ### 4.3 Clock and ceremony scheduling
 
@@ -174,7 +175,7 @@ The driver is what makes the change/config design enforceable:
 ### 4.8 Operational alerts, notifications and the daily digest
 
 - **Alert generator:** deterministic templates for service-mode changes, Sev1/Sev2 incidents, stalled delivery, and P1 human requests (service management design §2.1, §5.2). It deduplicates on (signal, scope), groups by correlation ID, and sends at most three non-Sev1 alerts a day; the rest roll into the digest (service management design §6.3).
-- **Notification adapter:** pluggable channels (desktop toast, email, self-hosted push). At least one channel must reach the human away from the PC. Quiet hours and business hours come from `service_levels.yaml`; only Sev1 and delivery-stopped alerts break quiet hours. Alert content is limited to counts and states, never task content. This resolves v0.1's open question on notification delivery.
+- **Notification adapter:** push notifications to the owner's phone (owner decision, 2026-09-27), mirrored as an alert with its action in the console. A notification carries a *link* to act in the console, never the action itself: approvals still go through the trusted confirmation dialog (console design §3.3). Quiet hours and business hours come from `service_levels.yaml`; only Sev1 and delivery-stopped alerts break quiet hours. Alert content is limited to counts and states, never task content. This resolves v0.1's open question on notification delivery.
 - **Daily digest:** generated by the driver from projections, with no LLM. It covers progress, pending requests with accumulated delay, spend against guardrails, service mode, at-risk SLOs, and the **audit chain head hash**, which gives the human's inbox an external tamper-evidence anchor (governance design §12). The PI report is the Client Comms-authored counterpart (service management design §11).
 
 ### 4.9 Backup and recovery jobs
@@ -187,7 +188,7 @@ The driver runs backups on the schedule in service management design §8: hourly
 
 ### 5.1 Service mode banner (every page)
 
-The engine's current `service_mode` (`normal`, `local_down`, `t2_down`, `t3_down`, `remote_down`, `budget_exhausted`, `paused`), with what's affected and what the system already did about it (service management design §4.2). When the monitor itself was down, the banner shows the gap after recovery.
+The engine's current `service_mode` (`normal`, `local_down`, `t2_down`, `t3_down`, `remote_down`, `budget_exhausted`, `paused`), with what's affected and what the system already did about it (service management design §4.2). It also carries the owner's **Start / Pause** control for the business simulation (§4.2). When the monitor itself was down, the banner shows the gap after recovery.
 
 ### 5.2 Backlog board (Kanban)
 
@@ -310,8 +311,8 @@ The monitor offers several write actions, and **none of them writes to a store d
 | Submit idea / new requirement / question | Intake message | `intake_gateway` → Client Comms (§4.4) |
 | Drag a card / reprioritize / edit roadmap | Intake message to PO | See below |
 | Answer an inbox item | `answer_human_request` | Engine → decision / change / deployment / risk record (§6) |
-| Pause (all / role / tier) | `pause` | Process supervisor; low friction (§10.2) |
-| Resume | `resume` | Process supervisor; re-auth required |
+| Start / Pause the simulation; pause a role or tier | `start` / `pause` | Process supervisor; active session (§10.2) |
+| Resume after an automatic Sev1 pause | `resume` | Process supervisor; re-auth required |
 | Revert to previous baseline | `revert_baseline` | Baseline loader (§4.6); re-auth required |
 | Edit a governance setting | System change proposal | Change/config design §4.2, approved by the human in the inbox |
 | Run a what-if scenario | Nothing: read-only simulation | §5.4 |
@@ -331,7 +332,7 @@ How the driver and monitor behave in each service mode (service management desig
 | `t3_down` | T3 jobs queue; **no failover of Opus authority** to T2; intake acknowledged and queued; daily digest still generated | Banner; alert naming queued decisions and the share of work still flowing; inbox shows nothing new until recovery |
 | `remote_down` | Local-only operation; referrals and decisions park | Banner; alert |
 | `budget_exhausted` | Paid tiers stop | Surfaced as a *decision* (raise the budget or wait), not an incident |
-| `paused` | Nothing dispatches; state preserved | Banner; resume requires re-auth |
+| `paused` | Nothing dispatches and no model is called; business clocks stop; state preserved | Banner with a **Start** button; chat messages queue with an acknowledgment |
 | **Monitor down** | Engine continues; alerts still sent via notification adapter | Human can't answer; alerts say so |
 | **Driver down** | Nothing runs | **External watchdog** (Windows scheduled task, every 5 min) detects stale heartbeats and sends a fixed alert (service management design §6.4) |
 
@@ -362,9 +363,9 @@ Stopping should be easy; starting or changing should be deliberate:
 
 | Action | Requirement |
 |---|---|
-| Pause, view anything | Active session |
+| Start, pause, view anything | Active session |
 | Answer escalation, approve deployment | Active session |
-| Resume, revert baseline, approve a system change, accept a risk | **Re-authentication** at the time of the action |
+| Resume after an automatic Sev1 pause, revert baseline, approve a system change, accept a risk | **Re-authentication** at the time of the action |
 
 ### 10.3 Integrity and accountability
 
@@ -416,9 +417,9 @@ The monitor is the only component with read-all visibility across every agent's 
 | Multi-sandbox-per-role scheduling | Org chart `instances` + engine scheduler capacity (§4.2; core engine design §7) |
 | Auth for the monitor UI | Localhost default, authenticated sessions, re-auth for high-impact actions (§10) |
 | Historical replay | Engine event log replay (§5.7) |
+| Notification channel (v0.2) | Phone push + console alert, owner decision 2026-09-27 (§4.8) |
+| Session mechanism (v0.2) | Admin-role credential sign-in, NWN `roadmap_auth.py` pattern, owner decision 2026-09-27 (console design §4) |
 
 **Still open:**
-- **Notification channel choice:** which channel reaches the human away from the PC (service management design §18).
-- **Session mechanism:** a local password + session cookie is enough for localhost. LAN or remote use may warrant a hardware key or OS-integrated auth (Windows Hello). Decide before LAN access is enabled.
 - **What-if scenario scope** (§5.4): which parameters the human can vary without the UI turning into a second config editor. Start with scope, budget, and instance counts.
 - **Mobile inbox:** answering P1 requests away from the PC implies remote access (§10.1). That's the point where the reverse-proxy and auth decisions stop being theoretical.
