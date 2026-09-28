@@ -49,3 +49,4 @@ python bin/roadmap-lint.py --summary
 | `product_owner` | T2 |
 | `executive_director` | T3 (may contact the human) |
 | `client_communications` | T3 (may contact the human) |
+| `change_coordinator` | T0; T2 for release notes (template planned) |

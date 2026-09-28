@@ -214,7 +214,7 @@ The owner's example: *a developer can't commit directly to production; the work 
 
 At no step does any agent hold a capability that could shortcut the next one.
 
-### 5.3 The change & release coordinator (new role)
+### 5.3 The change & release coordinator (new role, approved by the owner 2026-09-27)
 
 Change management needs someone to *do* its paperwork without being able to *approve* anything. That's a new agent role, **`change_coordinator`** (default tier T0; T2 for release notes and impact summaries):
 

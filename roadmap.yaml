@@ -709,7 +709,7 @@ items:
     product: agentco
     group: governance
     phase: design
-    state: ready
+    state: in_progress
     owner_role: human
     title: "Owner follow-ups from the 2026-09-27 decisions"
     wsjf: { business_value: 5, time_criticality: 8, risk_reduction: 8, job_size: 1 }
@@ -722,13 +722,31 @@ items:
     product: agentco
     group: governance
     phase: design
-    state: ready
+    state: done
     owner_role: human
     title: "Switch the GitHub repository to private"
     size_points: 1
+    date: "2026-09-27"
     acceptance_criteria:
       - "github.com/mrprice22/AgentCo → Settings → Danger Zone → Change visibility → Private"
     source: ["dec-repo-visibility"]
+
+  - id: story-optional-secure-boot
+    kind: story
+    nature: enabler
+    parent: feat-owner-actions-0927
+    product: agentco
+    group: governance
+    phase: design
+    state: draft
+    owner_role: human
+    title: "Optional: enable Secure Boot, then Device Encryption for disk-wide protection"
+    notes: >-
+      Optional extra layer; AgentCo's own data is covered by application-level encryption either way.
+      Enabling Secure Boot in UEFI can stop unsigned drivers or other boot entries from loading, so
+      check those first. Device Encryption on Home saves its recovery key to the signed-in Microsoft
+      account; confirm it's there before relying on it.
+    source: ["story-check-device-encryption result 2026-09-27"]
 
   - id: story-check-device-encryption
     kind: story
@@ -737,10 +755,14 @@ items:
     product: agentco
     group: governance
     phase: design
-    state: ready
+    state: done
     owner_role: human
     title: "Check whether this host supports Windows Device Encryption"
     size_points: 1
+    date: "2026-09-27"
+    notes: >-
+      manage-bde: OS volume fully decrypted, protection off, no key protectors.
+      msinfo32: UEFI, Secure Boot off, so Device Encryption is not available as configured.
     acceptance_criteria:
       - "Elevated PowerShell: manage-bde -status C: (or Settings → Privacy & security → Device encryption)"
       - "Result recorded on dec-data-at-rest; if unsupported, SQLCipher becomes the plan"
@@ -986,10 +1008,15 @@ items:
     product: agentco
     group: prompts
     phase: design
-    state: draft
+    state: ready
     owner_role: bootstrap
     title: "change_coordinator role template"
     depends_on: [dec-change-coordinator-role]
+    size_points: 3
+    acceptance_criteria:
+      - "agentPrompts/change_coordinator.jinja includes the directive and engagement blocks"
+      - "Modes: CR completeness check, impact summary, release assembly, approval package, meeting presentation"
+      - "No approve verb anywhere in its output contract; schemas/change_coordinator.output.json added"
     source: ["docs/agentco-agent-api-policy-design.md §5.3"]
 
   - id: feat-prompts-dedupe
@@ -1404,6 +1431,20 @@ items:
     wsjf: { business_value: 13, time_criticality: 8, risk_reduction: 8, job_size: 2 }
     description: "Paused: no leases, no model calls (chat included), business clocks and human deadlines stop; operational schedules continue."
     source: ["owner decisions 2026-09-27 (dec-chat-budget)", "docs/agentco-monitor-driver-design.md §4.2"]
+
+  - id: feat-p1-encryption
+    kind: feature
+    nature: enabler
+    parent: epic-build-p1
+    product: agentco
+    group: governance
+    phase: p1
+    state: draft
+    owner_role: bootstrap
+    title: "Encrypted stores: SQLCipher, encrypted file blobs, DPAPI-held key"
+    wsjf: { business_value: 5, time_criticality: 5, risk_reduction: 13, job_size: 3 }
+    description: "In place before the first real (non-simulated) data is written in phase 1."
+    source: ["dec-data-at-rest", "docs/agentco-governance-policy.md §15"]
 
   # ── Phase 2 ───────────────────────────────────────────────────────────────
   - id: epic-build-p2
@@ -2380,7 +2421,10 @@ items:
     recommended: a
     notes: "Check what this Windows 11 Home host supports: full BitLocker management is a Pro feature; Home offers Device Encryption on supported hardware."
     resolution: >-
-      Owner had no preference. Windows Device Encryption if this host supports it, otherwise SQLCipher per store (story-check-device-encryption).
+      Owner had no preference. Host check: volume unencrypted and Secure Boot off, so Device
+      Encryption is unavailable as configured. Application-level encryption: SQLCipher stores
+      and encrypted file blobs, key in Windows Credential Manager (DPAPI). Secure Boot + Device
+      Encryption stays optional (story-optional-secure-boot).
     date: "2026-09-27"
     source: ["docs/agentco-governance-policy.md §15"]
 
@@ -2560,7 +2604,7 @@ items:
     product: agentco
     group: decisions
     phase: p3
-    state: awaiting_human
+    state: done
     owner_role: human
     title: "Add a change_coordinator agent role?"
     question: "Change management needs a role that prepares CRs and releases but never approves. Add one?"
@@ -2569,6 +2613,8 @@ items:
       - { id: b, label: "Fold the duties into the Scrum Master" }
     recommended: a
     notes: "Keeps change enablement (preparation) separate from change authority (approval), as ITIL 4 does."
+    resolution: "Yes (option a): add change_coordinator."
+    date: "2026-09-27"
     source: ["docs/agentco-agent-api-policy-design.md §5.3"]
 
   - id: dec-owner-in-meetings

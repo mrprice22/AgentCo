@@ -308,7 +308,7 @@ This isn't a formal baseline selection (AgentCo is a single-operator system with
 | SA-9 External system services | Supplier assessment | This doc §8.2 |
 | SA-11 Developer testing | CI gates | Change/config §8 |
 | SC-7 Boundary protection | LAN-only endpoint, localhost monitor | Designed + this doc §6.3 |
-| SC-12 / SC-28 Key mgmt / data at rest | Credential Manager; store file ACLs | This doc §6.4 (at-rest encryption: open) |
+| SC-12 / SC-28 Key mgmt / data at rest | Credential Manager; SQLCipher stores and encrypted file blobs, key protected by DPAPI | This doc §6.4, §15 |
 | SI-4 System monitoring | Event tap, dashboards, alerts | Monitor design; service management design |
 | SI-7 Software & information integrity | Hash-verified models & configs | This doc §8.3; change/config §3 |
 | SI-10 Information input validation | Schema-validated outputs; provenance labeling | This doc §7 |
@@ -372,5 +372,5 @@ This isn't a formal baseline selection (AgentCo is a single-operator system with
 
 - **T2 ceiling:** whether DeepSeek-V4-pro via OpenCode can be raised above Internal depends on the supplier assessment. Until then, Confidential work skips T2, and the cost impact of that should be measured.
 - **Effectiveness of provenance labeling on small local models** is unproven; the injection eval suite should measure it before relying on it for anything.
-- **Data-at-rest encryption** (SC-28): decided 2026-09-27 (the owner had no preference). Use Windows Device Encryption if this Windows 11 Home host supports it, otherwise SQLCipher per store. Confirming support needs an elevated prompt (roadmap `story-check-device-encryption`).
+- **Data-at-rest encryption** (SC-28): decided 2026-09-27 (the owner had no preference). The host check found the OS volume unencrypted with protection off, and Secure Boot off, which rules out Windows Device Encryption as configured. So AgentCo encrypts at the application level: SQLCipher for every store and encrypted blobs in the file store, with the key held in Windows Credential Manager (DPAPI, tied to the owner's Windows login). Enabling Secure Boot and Device Encryption remains an optional, disk-wide extra layer for the owner (roadmap `story-optional-secure-boot`).
 - **Multi-client use:** if AgentCo ever builds for more than one client, classification needs a per-client dimension (tenant isolation), which this version doesn't model.
