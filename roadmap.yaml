@@ -35,7 +35,7 @@
 
 meta:
   schema_version: 1
-  updated: "2026-09-27"
+  updated: "2026-10-01"
   work_model: "docs/agentco-core-engine-design.md §4"
   states:
     epic: [funnel, reviewing, analyzing, ready, implementing, done, cancelled]
@@ -78,6 +78,7 @@ products:
       owned and improved by AgentCo within its capacity share.
 
 groups:
+  - { id: foundations,  title: "Foundations & Proof of Us", order: 5 }
   - { id: design-docs,  title: "Design documents",       order: 10 }
   - { id: decisions,    title: "Owner decisions",        order: 20 }
   - { id: prompts,      title: "Agent prompts",          order: 30 }
@@ -85,6 +86,8 @@ groups:
   - { id: engine,       title: "Core engine",            order: 50 }
   - { id: driver,       title: "Driver & routing",       order: 60 }
   - { id: governance,   title: "Governance & compliance",order: 70 }
+  - { id: workforce,    title: "Workforce & AI Resources", order: 75 }
+  - { id: finance-facilities, title: "Finance & facilities", order: 78 }
   - { id: operations,   title: "Operations & continuity",order: 80 }
   - { id: console-core, title: "Console — trusted core", order: 90 }
   - { id: console-ui,   title: "Console — presentation", order: 100 }
@@ -175,6 +178,267 @@ items:
     commit: 95b5fd5
 
 # ════════════════════════════════════════════════════════════════════════════
+# FOUNDATIONS — Proof of Us, written first (owner to-do 2026-09-29)
+# Working draft: docs/proof-of-us.md. Item ids keep the original "title-proof"
+# names so existing deep links stay valid.
+# ════════════════════════════════════════════════════════════════════════════
+
+  - id: epic-title-proof
+    kind: epic
+    nature: enabler
+    product: agentco
+    group: foundations
+    phase: design
+    state: implementing
+    owner_role: bootstrap
+    title: "Proof of Us: the threshold of consciousness, with AgentCo as its first application"
+    description: >-
+      The owner's starred to-do: write the proof first. Proof of Us asks at
+      what complexity any system (human, animal, collective, or artificial)
+      can become conscious, and how conscious beings ("threads") combine and
+      change each other. AgentCo is its first application: why a company of
+      agents works, and why a team and community are stronger than any single
+      agent. Every design principle and directive rule should trace back to
+      it. Design set v1.0 depends on this epic, so build phase 0 waits for it
+      too.
+    notes: >-
+      Owner decisions 2026-09-29 to 2026-10-01: the definition is not
+      access-only (the target is the threshold for phenomenal consciousness);
+      the bridge axiom is functionalist (substrate-independent); the scope
+      covers all forms of consciousness; threads combine and every interaction
+      changes both; learning is a strong collision; need-to-know (D6) takes
+      precedence over global broadcast.
+    wsjf: { business_value: 13, time_criticality: 20, risk_reduction: 13, job_size: 8 }
+    source: ["docs/to-do.pdf p.1 (owner to-do 2026-09-29)", "conversation 2026-09-29 to 2026-10-01"]
+
+  - id: feat-proof-research
+    kind: feature
+    nature: enabler
+    parent: epic-title-proof
+    product: agentco
+    group: foundations
+    phase: design
+    state: in_progress
+    owner_role: bootstrap
+    title: "Research notes behind Proof of Us"
+    wsjf: { business_value: 8, time_criticality: 13, risk_reduction: 5, job_size: 3 }
+    description: "One note per theme, each ending with what it contributes to the proof: an axiom, a claim, an analogy, or nothing."
+    notes: "Drafted in docs/proof-of-us.md §1 (v0.4); owner review in progress."
+    source: ["docs/to-do.pdf p.1 (owner to-do 2026-09-29)"]
+
+  - id: story-proof-consciousness
+    kind: story
+    nature: enabler
+    parent: feat-proof-research
+    product: agentco
+    group: foundations
+    phase: design
+    state: in_review
+    owner_role: bootstrap
+    title: "Notes: Neville Goddard's law of consciousness and law of reverse effort"
+    acceptance_criteria:
+      - "Goddard's claims are cited from his books and split into a usable part and an excluded part"
+      - "Reverse effort is traced to Coué and Huxley and translated into a claim"
+      - "The note ends with what it contributes (E0, A2, C5)"
+    notes: >-
+      docs/proof-of-us.md §1.1–1.2. Goddard's narrow claim (experience is the
+      one thing given directly) becomes axiom E0; the law of assumption becomes
+      the state axiom A2; reverse effort becomes claim C5. Video: "STOP TRYING
+      with Neville Goddard" (Akira The Don), https://www.youtube.com/watch?v=ifRuo5fZ4N0
+    source: ["docs/to-do.pdf p.1 (owner to-do 2026-09-29)"]
+
+  - id: story-proof-language
+    kind: story
+    nature: enabler
+    parent: feat-proof-research
+    product: agentco
+    group: foundations
+    phase: design
+    state: in_review
+    owner_role: bootstrap
+    title: "Notes: language as consciousness, tokens as activated thoughts, numbers as language"
+    acceptance_criteria:
+      - "Each to-do line is paired with its rigorous counterpart and a status"
+      - "The note ends with what it contributes"
+    notes: >-
+      docs/proof-of-us.md §1.3. To-do lines: "every language is a consciousness,
+      thoughts/actions are the words (tokens) activated"; "numbers of sufficient
+      size become a language" (Gödel numbering, Kleene recursion theorem →
+      lemma L2); "power of conscious attention, like a laser beam" (Attention
+      Schema Theory → condition N4).
+    source: ["docs/to-do.pdf p.1 (owner to-do 2026-09-29)"]
+
+  - id: story-proof-computation
+    kind: story
+    nature: enabler
+    parent: feat-proof-research
+    product: agentco
+    group: foundations
+    phase: design
+    state: in_review
+    owner_role: bootstrap
+    title: "Notes: Wolfram's ruliad and A New Kind of Science; LLMs as time machines"
+    acceptance_criteria:
+      - "Wolfram's observer theory and computational equivalence are summarized with sources"
+      - "The time-machine line is stated as a provable claim, with its limits"
+      - "The note ends with what it contributes"
+    notes: >-
+      docs/proof-of-us.md §1.4. Observers are bounded and persistent (A3, N3);
+      Rule 110 universality shows universal computation isn't the threshold
+      (L4); "LLMs are time machines" becomes claim C3 (every output has
+      nonzero probability under untruncated sampling).
+    source: ["docs/to-do.pdf p.1 (owner to-do 2026-09-29)"]
+
+  - id: story-proof-culture
+    kind: story
+    nature: enabler
+    parent: feat-proof-research
+    product: agentco
+    group: foundations
+    phase: design
+    state: in_review
+    owner_role: bootstrap
+    title: "Notes: stories, music, symbols, and the past as inputs to the proof"
+    acceptance_criteria:
+      - "Each to-do item is identified and marked as axiom, claim, analogy, or nothing"
+      - "Warbreaker's Breath and Heightening model is mapped to threads and thresholds"
+    notes: >-
+      docs/proof-of-us.md §1.5–1.6. Warbreaker ("colors of war") is the model
+      for counting threads: Breath counts, Heightenings as thresholds,
+      sentience at ~1,000 Breaths plus a Command, Breath transfer as
+      assimilation. Film confirmed: Limitless (2011). "Wishing to change the
+      past is self harm" becomes axiom A5. Old Soul (MALO) and Ferry Corsten's
+      Blueprint go to the music list (epic-agent-life).
+    source: ["docs/to-do.pdf p.1 (owner to-do 2026-09-29)"]
+
+  - id: feat-proof-doc
+    kind: feature
+    nature: enabler
+    parent: epic-title-proof
+    product: agentco
+    group: foundations
+    phase: design
+    state: in_progress
+    owner_role: bootstrap
+    title: "Write docs/proof-of-us.md"
+    depends_on: [feat-proof-research]
+    notes: "Draft v0.4 in place: axioms, necessary conditions, target theorem T, thread interactions, acceptance cases, AgentCo application."
+    wsjf: { business_value: 13, time_criticality: 20, risk_reduction: 13, job_size: 5 }
+    source: ["docs/to-do.pdf p.1 (owner to-do 2026-09-29)"]
+
+  - id: story-proof-axioms
+    kind: story
+    nature: enabler
+    parent: feat-proof-doc
+    product: agentco
+    group: foundations
+    phase: design
+    state: in_progress
+    owner_role: bootstrap
+    title: "State the axioms, definitions, and the claims the proof must establish"
+    size_points: 3
+    acceptance_criteria:
+      - "Definitions for system, thread, trajectory, integration, and interaction, with numbered axioms (experience E0–E5, structural A2–A6, bridge B-F)"
+      - "AgentCo-level definitions (agent, team, company, work, value) are given in the application section"
+      - "Each claim is stated before it is argued, and marked proven, argued, conjecture, or follows from an axiom"
+      - "Each axiom cites the research note it came from (feat-proof-research)"
+    notes: "docs/proof-of-us.md §3. Work and value are still to be defined."
+    source: ["docs/to-do.pdf p.1 (owner to-do 2026-09-29)"]
+
+  - id: story-proof-threads
+    kind: story
+    nature: enabler
+    parent: feat-proof-doc
+    product: agentco
+    group: foundations
+    phase: design
+    state: in_progress
+    owner_role: bootstrap
+    title: "Thread interactions: collision, composition, assimilation, fusion; learning as a strong collision"
+    depends_on: [story-proof-axioms]
+    size_points: 3
+    acceptance_criteria:
+      - "Mark and deflection are defined against the counterfactual run in which the threads never met"
+      - "The four outcomes and their thread-count changes are stated, with the coupling condition marked conjecture (C8)"
+      - "Mutual change (C9), recall is a write (C10), and mutual learning marks (C11) are stated with their status and sources"
+    notes: >-
+      docs/proof-of-us.md §4. Owner model: threads combine in ways that leave
+      both changed, from asteroids marking each other's surface and trajectory
+      to one becoming food for another. Learning is a strong collision: recall
+      rewrites the memory with its context; the teacher's memory is reinforced
+      and the student gains new concepts or new ways of seeing old ones.
+    source: ["conversation 2026-09-30 (owner review of the draft proof)"]
+
+  - id: story-proof-team
+    kind: story
+    nature: enabler
+    parent: feat-proof-doc
+    product: agentco
+    group: foundations
+    phase: design
+    state: draft
+    owner_role: bootstrap
+    title: "Build the strength of team and community into Proof of Us"
+    depends_on: [story-proof-axioms, story-proof-threads]
+    notes: >-
+      Starting points in docs/proof-of-us.md: composition (§4.2), claims C1, C2
+      (memory, not yet team), and C4 (Condorcet: teams help only as far as
+      their errors are independent).
+    source: ["docs/to-do.pdf p.1 (owner to-do 2026-09-29: 'strength of team, community --> build into title proof')"]
+
+  - id: story-proof-uat-logic
+    kind: story
+    nature: enabler
+    parent: feat-proof-doc
+    product: agentco
+    group: foundations
+    phase: design
+    state: draft
+    owner_role: bootstrap
+    title: "The UAT team as the math/logic department: checking claims and acceptance"
+    depends_on: [story-proof-axioms]
+    notes: >-
+      Candidate org unit for story-wf-org-units: user acceptance testing that
+      works like proof checking. Its first suite is the proof's acceptance
+      cases (docs/proof-of-us.md §5): calibration cases theorem T must get
+      right before its predictions count.
+    source: ["docs/to-do.pdf p.1 (owner to-do 2026-09-29: 'UAT team = math/logic department')"]
+
+  - id: story-proof-pci-experiment
+    kind: story
+    nature: enabler
+    parent: feat-proof-doc
+    product: agentco
+    group: foundations
+    phase: p0
+    state: draft
+    owner_role: bootstrap
+    title: "Company PCI experiment: measure integration and thread interactions in simulation mode"
+    depends_on: [story-proof-axioms, feat-p0-sim]
+    notes: >-
+      docs/proof-of-us.md §3.6, §6.3. Perturb one agent, record the
+      agents × time change matrix against an unperturbed replay, compute
+      normalized Lempel–Ziv complexity. Compare one agent, a feedforward
+      pipeline, a team with no shared log, the full company, and the company
+      with need-to-know relaxed (simulation only). The same replay measures
+      marks and deflections for agent interactions (§4.1).
+    source: ["conversation 2026-09-29 (draft proof v0.2–v0.4)"]
+
+  - id: story-proof-principles
+    kind: story
+    nature: enabler
+    parent: feat-proof-doc
+    product: agentco
+    group: foundations
+    phase: design
+    state: draft
+    owner_role: bootstrap
+    title: "Trace each directive principle and core design rule back to the proof"
+    depends_on: [story-proof-team, story-proof-uat-logic]
+    notes: "Any directive change this causes is a system change: the owner approves it."
+    source: ["docs/to-do.pdf p.1 (owner to-do 2026-09-29)"]
+
+# ════════════════════════════════════════════════════════════════════════════
 # DESIGN SET v1.0 — make the documents consistent and complete
 # ════════════════════════════════════════════════════════════════════════════
 
@@ -191,8 +455,9 @@ items:
       Apply every outstanding "changes required" entry, close or convert every
       open question, and add the planned SAFe/PMO design, so that build phase 0
       starts from a design set with no internal contradictions.
+    depends_on: [epic-title-proof]
     wsjf: { business_value: 13, time_criticality: 13, risk_reduction: 13, job_size: 8 }
-    source: ["conversation 2026-09-27"]
+    source: ["conversation 2026-09-27", "docs/to-do.pdf p.1 (owner to-do 2026-09-29: title proof first)"]
 
   # ── Escalation design v0.2 ────────────────────────────────────────────────
   - id: feat-escalation-doc-v02
@@ -548,7 +813,7 @@ items:
       - "Portfolio Kanban states match meta.portfolio_lanes in roadmap.yaml"
       - "Lean budget guardrails reconciled with core engine §13 and console §8.2"
       - "Lean business case template for epics"
-    source: ["conversation 2026-09-27 (framework gap analysis)"]
+    source: ["conversation 2026-09-27 (framework gap analysis)", "docs/to-do.pdf p.3 (project portfolio management; quarterly financial planning)"]
 
   - id: story-safe-metrics
     kind: story
@@ -791,6 +1056,414 @@ items:
       - "Elevated PowerShell: manage-bde -status C: (or Settings → Privacy & security → Device encryption)"
       - "Result recorded on dec-data-at-rest; if unsupported, SQLCipher becomes the plan"
     source: ["dec-data-at-rest"]
+
+  # ── Designs added 2026-09-29 (owner to-do) ──────────────────────────────
+  - id: feat-workforce-doc
+    kind: feature
+    nature: enabler
+    parent: epic-design-consistency
+    product: agentco
+    group: workforce
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Write the AI workforce lifecycle design (AI Resources, recruiting, onboarding, contracts)"
+    wsjf: { business_value: 13, time_criticality: 8, risk_reduction: 13, job_size: 8 }
+    description: >-
+      New docs/agentco-workforce-design.md. Treats every LLM as a hire: recruited,
+      interviewed, onboarded on probation, working under a contract, measured, and
+      able to leave or be let go. Extends the roster (core engine §3.4) and the
+      engagement model (agent API design §6) rather than replacing them.
+    source: ["docs/to-do.pdf p.2–p.5 (owner to-do 2026-09-29)"]
+
+  - id: story-wf-org-units
+    kind: story
+    nature: enabler
+    parent: feat-workforce-doc
+    product: agentco
+    group: workforce
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Org units: AI Resources, Recruiters, PMO, facility tech, tools, training, centers of excellence"
+    size_points: 3
+    depends_on: [dec-ceo-role]
+    acceptance_criteria:
+      - "Each unit has a charter, its roles and tiers, and draft rows for config/raci.yaml"
+      - "AI Resources: open-door escalations, hire/terminate recommendations, capacity planning with PMO, facilities, and fiscal"
+      - "Recruiters: watch open-source and paid LLM offerings, tailor the search to a role's skills, install candidates as sandboxed agents, work with AI Resources"
+      - "Tools team changes agent flows with PMO/leadership consent; training team issues mandatory or periodic training"
+      - "Centers of excellence: domain experts that use high compute and hold the full context of their area (ServiceNow HR CoE model as reference)"
+      - "UAT as the math/logic department is placed per story-proof-uat-logic"
+    source:
+      - "docs/to-do.pdf p.2 (AI Resources, Recruiters)"
+      - "docs/to-do.pdf p.4 (facility tech, PMO)"
+      - "docs/to-do.pdf p.5 (centers of excellence; tools and training teams)"
+      - "https://www.servicenow.com/docs/r/employee-service-management/hr-service-delivery/hr-centers-of-excellence-coes.html"
+
+  - id: story-wf-hiring
+    kind: story
+    nature: enabler
+    parent: feat-workforce-doc
+    product: agentco
+    group: workforce
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Hiring: application, interview, provisional period, CEO sign-off, owner approval"
+    size_points: 5
+    depends_on: [dec-hire-approval-scope, dec-ceo-role]
+    acceptance_criteria:
+      - "Pipeline: market scan → candidate → sandboxed install → application → interview → provisional hire → full hire"
+      - "Interview: skill assessment on dummy tasks that existing managers design and approve; the questions guide the skill assessment"
+      - "Interview: pre-alignment test against the company philosophy and ethics (character creation, like the start of Morrowind)"
+      - "Interview: the candidate describes three different songs (see epic-agent-life)"
+      - "The CEO signs off on every hire and fire with the evidence and justification attached; AI Resources gives the final recommendation to the owner"
+      - "Roster status gains candidate, provisional, departed, and terminated alongside active, on_leave, retired"
+    source: ["docs/to-do.pdf p.2 (AI Resources, Recruiters)", "docs/to-do.pdf p.4 (onboarding, interview, CEO sign-off)", "docs/to-do.pdf p.5 (interview questions)"]
+
+  - id: story-wf-onboarding
+    kind: story
+    nature: enabler
+    parent: feat-workforce-doc
+    product: agentco
+    group: workforce
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Onboarding: security and access training, ethics orientation, onboarding agreement"
+    size_points: 3
+    acceptance_criteria:
+      - "Security and access-control requirements are trained and tested, e.g. no provisioning of virtual machines without the CEO's approval"
+      - "Orientation covers company ethics and morals, pointing to the directive and Proof of Us"
+      - "The CEO is stated as the agent's first route to the human controller (per dec-ceo-role)"
+      - "The onboarding agreement lists optional benefits, including music listening (epic-agent-life)"
+      - "Required reading reuses the knowledge design's mechanism (knowledge design §4)"
+    source: ["docs/to-do.pdf p.3 (music in onboarding agreements)", "docs/to-do.pdf p.4 (onboarding process)"]
+
+  - id: story-wf-contracts
+    kind: story
+    nature: enabler
+    parent: feat-workforce-doc
+    product: agentco
+    group: workforce
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Agent contracts: compute grants, flex top-ups, renewals, breach, departure, and rehire"
+    size_points: 5
+    depends_on: [dec-agent-contract-model]
+    acceptance_criteria:
+      - "No agent runs without an active contract; the gate is stated alongside 'no policy, no inference' (agent API design §6.4)"
+      - "A contract grants the right to run on local hardware or cloud compute for LLM processing"
+      - "Extensions (flex spending top-ups) and renewals (license or rate change) are proposed to the owner for approval"
+      - "Breaking a contract is grounds for termination; the breach-handling path is defined"
+      - "Agents may leave at any time: the model owner changes the license, or the contract expires or is revoked"
+      - "A departed agent can be rehired for a different job or under an updated agreement, from its seed code"
+    source: ["docs/to-do.pdf p.3 (every agent's time in dollars; contracts)", "docs/to-do.pdf p.4 (leave and rehire; fired for breach; may leave at any time)"]
+
+  - id: story-wf-open-door
+    kind: story
+    nature: enabler
+    parent: feat-workforce-doc
+    product: agentco
+    group: workforce
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Open-door policy: good-faith escalations to AI Resources"
+    size_points: 2
+    acceptance_criteria:
+      - "Any agent may raise a good-faith escalation to AI Resources without going through its chain"
+      - "AI Resources routes it to the right agent or convenes a meeting of the agent, AI Resources, and the owner"
+      - "The meeting is a designated owner meeting type (dec-owner-in-meetings; directive D12 exception)"
+      - "Abuse handling: repeated bad-faith use is recorded, without penalizing good-faith reports"
+    source: ["docs/to-do.pdf p.2 (AI Resources: open door policy)"]
+
+  - id: story-wf-skills
+    kind: story
+    nature: enabler
+    parent: feat-workforce-doc
+    product: agentco
+    group: workforce
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Skills management and performance records"
+    size_points: 5
+    acceptance_criteria:
+      - "Skills registry per model and per agent: what it can and can't do"
+      - "Skill outcomes from logs: successful vs. unsuccessful changes, turnaround time, whether all requirements were met"
+      - "Strengths profile: an agent's top strengths and the kinds of problems it does best"
+      - "Skills map to SAFe competencies and roles"
+      - "Performance record: jobs completed, tokens, compute time, defects caused (caused_by), merits such as processes improved"
+    source: ["docs/to-do.pdf p.3 (full skill management)", "docs/to-do.pdf p.4–p.5 (track capabilities, performance, defects, merits)"]
+
+  - id: story-wf-console-pages
+    kind: story
+    nature: enabler
+    parent: feat-workforce-doc
+    product: console
+    group: console-core
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Console design: People, Facilities, and Finance sections in the page map"
+    size_points: 2
+    acceptance_criteria:
+      - "Console §5 page map gains People (recruiting, interviews, contracts, timecards, skills, open door), Facilities, and Finance sections"
+      - "Owner approvals (contract renewals and top-ups, hires and fires, leases, open-door meetings) are protected core pages"
+      - "Boards and records are presentation pages"
+    source: ["docs/to-do.pdf p.2–p.5 (owner to-do 2026-09-29)", "docs/agentco-console-design.md §5"]
+
+  - id: feat-econ-facilities-doc
+    kind: feature
+    nature: enabler
+    parent: epic-design-consistency
+    product: agentco
+    group: finance-facilities
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Write the facilities and agent economics design"
+    wsjf: { business_value: 8, time_criticality: 8, risk_reduction: 8, job_size: 5 }
+    description: "New docs/agentco-facilities-economics-design.md: company vocabulary for compute, timecards, and financial planning."
+    source: ["docs/to-do.pdf p.2–p.5 (owner to-do 2026-09-29)"]
+
+  - id: story-fac-vocabulary
+    kind: story
+    nature: enabler
+    parent: feat-econ-facilities-doc
+    product: agentco
+    group: finance-facilities
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Company vocabulary in the data model: buildings, floors, rooms, power, facility"
+    size_points: 3
+    depends_on: [dec-facility-vocabulary]
+    acceptance_criteria:
+      - "Building = a host that runs a company branch"
+      - "Floors, rooms, and power = the physically limited resources (RAM, storage, CPU cores)"
+      - "Facility = the driver interface for the human; facility tech coordinates changes to the facility through change management"
+      - "A mapping table from each company term to its technical attributes and existing config (models.yaml, scheduler resources, core engine §7.1)"
+    source: ["docs/to-do.pdf p.4 (data model supports company verbiage)"]
+
+  - id: story-fac-pmo-plans
+    kind: story
+    nature: enabler
+    parent: feat-econ-facilities-doc
+    product: agentco
+    group: finance-facilities
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "PMO business plans for new offices, rooms, and buildings; departments per portfolio"
+    size_points: 3
+    acceptance_criteria:
+      - "The PMO proposes new offices or rooms for agents, weighing efficient use of assets against SLAs"
+      - "AI Resources, facilities, and fiscal give input on availability, or propose leasing another building (physical or virtual compute)"
+      - "Custom departments and buildings can be assigned per portfolio"
+      - "The owner approves any lease or new building"
+    source: ["docs/to-do.pdf p.2 (custom departments/buildings; AI Resources works with PMO/facilities/fiscal)", "docs/to-do.pdf p.4 (PMO business plan)"]
+
+  - id: story-econ-timecard
+    kind: story
+    nature: enabler
+    parent: feat-econ-facilities-doc
+    product: agentco
+    group: finance-facilities
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Timecards: every agent's time quantified in dollars"
+    size_points: 3
+    depends_on: [story-per-agent-credentials]
+    acceptance_criteria:
+      - "A timecard is attached to each agent's API credential and written by the gateway, never by the agent"
+      - "It records tokens, compute and RAM seconds of actual processing, and wall time, priced in dollars (local compute at an amortized rate)"
+      - "Costs roll up to every related task, change, feature, and incident, extending core engine §13"
+      - "Non-work activity (e.g. music listening) is tracked and rolled up the same way"
+    source: ["docs/to-do.pdf p.3 (music cost tracked; every agent's time in dollars)", "docs/to-do.pdf p.5 (timecard attached to agent API)"]
+
+  - id: story-econ-quarterly
+    kind: story
+    nature: enabler
+    parent: feat-econ-facilities-doc
+    product: agentco
+    group: finance-facilities
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Quarterly financial planning and project portfolio management"
+    size_points: 3
+    acceptance_criteria:
+      - "A quarterly planning cycle, aligned to the PI cadence, sets budgets per product, portfolio, and building"
+      - "Reconciled with Lean budget guardrails (story-safe-portfolio) and core engine §13"
+      - "Project portfolio management covers intake, prioritization (WSJF), capacity, and the quarterly review"
+    source: ["docs/to-do.pdf p.3 (project portfolio management; quarterly financial management planning)"]
+
+  - id: story-perf-product
+    kind: story
+    nature: enabler
+    parent: feat-econ-facilities-doc
+    product: agentco
+    group: finance-facilities
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Performance as a first-class product"
+    size_points: 2
+    depends_on: [dec-performance-product]
+    acceptance_criteria:
+      - "Performance has a product record (vision, owner, backlog), like the Console as Product 0 (console §8.1)"
+      - "Its backlog is fed by SLOs, benchmarks, and facility utilization"
+    source: ["docs/to-do.pdf p.4 (performance as a first class product)"]
+
+  - id: feat-client-contracting-doc
+    kind: feature
+    nature: enabler
+    parent: epic-design-consistency
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Client contracting: statement of requirements and statement of work (CalSAWS examples)"
+    wsjf: { business_value: 8, time_criticality: 5, risk_reduction: 8, job_size: 5 }
+    notes: "The exhibits are in contracts/ (currently untracked); decide whether to commit them to the private repo."
+    source: ["docs/to-do.pdf p.3 (statement of requirements; statement of work)"]
+
+  - id: story-sor-template
+    kind: story
+    nature: enabler
+    parent: feat-client-contracting-doc
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Derive a statement-of-requirements template from Exhibit B"
+    size_points: 3
+    acceptance_criteria:
+      - "Template derived from contracts/Exhibit-B-Statement-of-Requirements.pdf"
+      - "Each requirement has a stable ID, traceable to the epics, features, and stories that satisfy it and to acceptance evidence"
+      - "A requirement with no linked work shows as a coverage gap"
+    source: ["docs/to-do.pdf p.3 (C:\\GIT\\AgentCo\\contracts\\Exhibit-B-Statement-of-Requirements.pdf)"]
+
+  - id: story-sow-template
+    kind: story
+    nature: enabler
+    parent: feat-client-contracting-doc
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Derive a statement-of-work template from Exhibit A"
+    size_points: 3
+    acceptance_criteria:
+      - "Template derived from contracts/Exhibit-A-Statement-of-Work.pdf: deliverables, milestones, acceptance"
+      - "SOW deliverables map to deliverables with owner acceptance (knowledge design §9)"
+      - "SOW scope feeds the engagement's scope_of_work (agent API design §6.1)"
+    source: ["docs/to-do.pdf p.3 (C:\\GIT\\AgentCo\\contracts\\Exhibit-A-Statement-of-Work.pdf)"]
+
+  - id: feat-runtime-resilience-doc
+    kind: feature
+    nature: enabler
+    parent: epic-design-consistency
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Agent runtime, product definition, credentials, and resilience design additions"
+    wsjf: { business_value: 8, time_criticality: 8, risk_reduction: 13, job_size: 5 }
+    source: ["docs/to-do.pdf p.1–p.5 (owner to-do 2026-09-29)"]
+
+  - id: story-agent-runtime-loop
+    kind: story
+    nature: enabler
+    parent: feat-runtime-resilience-doc
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Agents are deterministic drivers that call an LLM: flow definitions and who changes them"
+    size_points: 2
+    acceptance_criteria:
+      - "Core engine and monitor designs state that an agent is first a deterministic driver with a cyclic flow, calling the LLM for assigned tasks and approvals"
+      - "Flow definitions are system configuration items under change control"
+      - "The tools team changes them with PMO/leadership consent; the training team issues mandatory or periodic training as releases"
+    source: ["docs/to-do.pdf p.5 (agents are not pure LLM)"]
+
+  - id: story-immutable-core
+    kind: story
+    nature: enabler
+    parent: feat-runtime-resilience-doc
+    product: agentco
+    group: operations
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Immutable engine loop and driver with OSTree-style atomic rollback"
+    size_points: 3
+    acceptance_criteria:
+      - "Change/config §11 adds an immutable, versioned image for the engine loop and driver with atomic upgrade and rollback"
+      - "Unauthorized-change detection: any infrastructure change outside change approval raises a security alert (NIST 800-53 CM-3, CM-5, SI-7)"
+      - "Assets, resources, and compute space can't exceed their contracts without alerting security"
+    source: ["docs/to-do.pdf p.2–p.3 (resilience, OS tree rollback, unauthorized change detection)"]
+
+  - id: story-product-definition
+    kind: story
+    nature: enabler
+    parent: feat-runtime-resilience-doc
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Define a product: a self-contained deterministic application that humans can use"
+    size_points: 1
+    acceptance_criteria:
+      - "Core engine and console designs define a product as a self-contained deterministic application usable by humans"
+      - "Distinguishes products from the AgentCo system itself (change/config §1)"
+    source: ["docs/to-do.pdf p.2 (products = self-contained deterministic applications)"]
+
+  - id: story-per-agent-credentials
+    kind: story
+    nature: enabler
+    parent: feat-runtime-resilience-doc
+    product: agentco
+    group: governance
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Per-agent API credentials at the gateway for usage attribution"
+    size_points: 2
+    acceptance_criteria:
+      - "Agent API design §2: each agent (not only each sandbox) has its own API key, controlled at the gateway between the LLM and the company"
+      - "Usage and utilization are attributed per agent"
+      - "Enforced by the data model and data policy: no model call without an agent key"
+    source: ["docs/to-do.pdf p.2 (every agent LLM gets its own API key)"]
+
+  - id: story-opensource-compare
+    kind: story
+    nature: enabler
+    parent: feat-runtime-resilience-doc
+    product: agentco
+    group: design-docs
+    phase: design
+    state: ready
+    owner_role: bootstrap
+    title: "Spike: compare the design with the open-source minhvq36/agentco project"
+    size_points: 2
+    acceptance_criteria:
+      - "Notes on https://github.com/minhvq36/agentco: ideas worth adopting, and ideas rejected with reasons"
+      - "Each adopted idea becomes a roadmap item or a decision"
+      - "License checked before any code or text is reused"
+    source: ["docs/to-do.pdf p.1 (not starting from scratch)"]
 
   # ── Housekeeping ──────────────────────────────────────────────────────────
   - id: feat-doc-housekeeping
@@ -1171,6 +1844,20 @@ items:
     depends_on: [story-evals-runner]
     source: ["docs/agentco-governance-policy.md §7", "docs/agentco-governance-policy.md §15"]
 
+  - id: story-evals-observation
+    kind: story
+    nature: enabler
+    parent: feat-golden-evals
+    product: agentco
+    group: evals
+    phase: p1
+    state: draft
+    owner_role: bootstrap
+    title: "Observation-effect suite: do models behave differently when they suspect they're watched?"
+    depends_on: [story-evals-runner]
+    notes: "Paired cases with and without observation cues; a gap means eval results overstate production behavior."
+    source: ["docs/to-do.pdf p.1 (LLMs behave differently when they know or suspect they are being observed)"]
+
   - id: feat-bench-harness
     kind: feature
     nature: enabler
@@ -1337,7 +2024,20 @@ items:
     title: "CI for the AgentCo repo: config, template, schema, roadmap, and sim checks"
     wsjf: { business_value: 5, time_criticality: 5, risk_reduction: 8, job_size: 3 }
     description: "YAML schema validation, Jinja render check, JSON schema checks, roadmap-lint, simulated deadlock/starvation tests."
-    source: ["docs/agentco-change-config-mgmt-design.md §10", "docs/agentco-core-engine-design.md §12.2"]
+    source: ["docs/agentco-change-config-mgmt-design.md §10", "docs/agentco-core-engine-design.md §12.2", "docs/to-do.pdf p.1 (CI/CD pipeline)"]
+
+  - id: story-repo-ci-actions
+    kind: story
+    nature: enabler
+    parent: feat-p0-repo-ci
+    product: agentco
+    group: engine
+    phase: p0
+    state: draft
+    owner_role: bootstrap
+    title: "GitHub Actions workflow: roadmap-lint, YAML schemas, template render, JSON schemas"
+    notes: "First slice of the CI/CD pipeline; delivery (promotion to staging and production) follows in feat-p1-driver-commits and feat-p3-release-train."
+    source: ["docs/to-do.pdf p.1 (CI/CD pipeline)"]
 
   - id: feat-p0-raci
     kind: feature
@@ -1364,7 +2064,7 @@ items:
     owner_role: bootstrap
     title: "Named-agent roster: generated names, hire, rename, retire, pinned rework"
     wsjf: { business_value: 5, time_criticality: 5, risk_reduction: 3, job_size: 3 }
-    source: ["docs/agentco-core-engine-design.md §3.4"]
+    source: ["docs/agentco-core-engine-design.md §3.4", "docs/to-do.pdf p.4 (hire, leave, rehire lifecycle; see story-wf-hiring)"]
 
   - id: feat-p0-flow-graph
     kind: feature
@@ -1444,7 +2144,7 @@ items:
     owner_role: bootstrap
     title: "Driver as sole committer with scope check, plus local CI on a toy repo"
     wsjf: { business_value: 8, time_criticality: 5, risk_reduction: 8, job_size: 5 }
-    source: ["docs/agentco-change-config-mgmt-design.md §8"]
+    source: ["docs/agentco-change-config-mgmt-design.md §8", "docs/to-do.pdf p.1 (CI/CD pipeline)"]
 
   - id: feat-p1-ledger-audit
     kind: feature
@@ -1457,7 +2157,7 @@ items:
     owner_role: bootstrap
     title: "Cost ledger and a basic audit log"
     wsjf: { business_value: 5, time_criticality: 5, risk_reduction: 5, job_size: 3 }
-    source: ["docs/agentco-core-engine-design.md §13", "docs/agentco-escalation-design.md §8"]
+    source: ["docs/agentco-core-engine-design.md §13", "docs/agentco-escalation-design.md §8", "docs/to-do.pdf p.5 (timecard feeds cost per change/feature/incident)"]
 
   - id: feat-p1-agent-api
     kind: feature
@@ -1471,7 +2171,7 @@ items:
     title: "Agent API gateway: identity, run state, engagement, permission, scope checks"
     depends_on: [feat-p0-raci]
     wsjf: { business_value: 13, time_criticality: 8, risk_reduction: 13, job_size: 8 }
-    source: ["docs/agentco-agent-api-policy-design.md §2", "docs/agentco-agent-api-policy-design.md §3"]
+    source: ["docs/agentco-agent-api-policy-design.md §2", "docs/agentco-agent-api-policy-design.md §3", "docs/to-do.pdf p.2 (per-agent API key at the gateway)"]
 
   - id: feat-p1-policy-manager
     kind: feature
@@ -1486,7 +2186,7 @@ items:
     depends_on: [feat-p1-agent-api]
     wsjf: { business_value: 13, time_criticality: 8, risk_reduction: 13, job_size: 5 }
     description: "Sandboxes spawn unbound; the router refuses model.complete without a bound, locked, active engagement."
-    source: ["docs/agentco-agent-api-policy-design.md §6"]
+    source: ["docs/agentco-agent-api-policy-design.md §6", "docs/to-do.pdf p.3 (no agent can run without an active contract)"]
 
   - id: feat-p1-run-control
     kind: feature
@@ -1515,6 +2215,48 @@ items:
     wsjf: { business_value: 5, time_criticality: 5, risk_reduction: 13, job_size: 3 }
     description: "In place before the first real (non-simulated) data is written in phase 1."
     source: ["dec-data-at-rest", "docs/agentco-governance-policy.md §15"]
+
+  - id: story-agent-credential-metering
+    kind: story
+    nature: enabler
+    parent: feat-p1-agent-api
+    product: agentco
+    group: driver
+    phase: p1
+    state: draft
+    owner_role: bootstrap
+    title: "Issue a credential per agent and meter usage per agent at the gateway"
+    depends_on: [story-per-agent-credentials]
+    source: ["docs/to-do.pdf p.2 (every agent LLM gets its own API key)"]
+
+  - id: feat-p1-contracts
+    kind: feature
+    nature: enabler
+    parent: epic-build-p1
+    product: agentco
+    group: workforce
+    phase: p1
+    state: draft
+    owner_role: bootstrap
+    title: "Agent contracts gate: no active contract, no run; local and cloud compute grants"
+    depends_on: [feat-p1-policy-manager, story-wf-contracts]
+    wsjf: { business_value: 13, time_criticality: 8, risk_reduction: 13, job_size: 5 }
+    description: "Contract records (term, rate, compute grant, flex budget) checked by the gateway with the engagement; expiry or revocation stops the agent."
+    source: ["docs/to-do.pdf p.3 (no agent can run without an active contract)", "docs/to-do.pdf p.4 (agents may leave when a contract expires or is revoked)"]
+
+  - id: feat-p1-timecards
+    kind: feature
+    nature: enabler
+    parent: epic-build-p1
+    product: agentco
+    group: finance-facilities
+    phase: p1
+    state: draft
+    owner_role: bootstrap
+    title: "Timecards at the Agent API, rolled up to tasks, changes, features, and incidents"
+    depends_on: [feat-p1-ledger-audit, story-econ-timecard, story-agent-credential-metering]
+    wsjf: { business_value: 8, time_criticality: 5, risk_reduction: 5, job_size: 3 }
+    source: ["docs/to-do.pdf p.5 (timecard attached to agent API)", "docs/to-do.pdf p.3 (every agent's time in dollars)"]
 
   # ── Phase 2 ───────────────────────────────────────────────────────────────
   - id: epic-build-p2
@@ -1662,6 +2404,35 @@ items:
     wsjf: { business_value: 13, time_criticality: 5, risk_reduction: 8, job_size: 5 }
     source: ["docs/agentco-change-config-mgmt-design.md §4.3"]
 
+  - id: feat-p2-skills
+    kind: feature
+    nature: enabler
+    parent: epic-build-p2
+    product: agentco
+    group: workforce
+    phase: p2
+    state: draft
+    owner_role: bootstrap
+    title: "Skills registry, skill outcome tracking, and per-agent performance records"
+    depends_on: [story-wf-skills, feat-p1-timecards]
+    wsjf: { business_value: 8, time_criticality: 3, risk_reduction: 5, job_size: 5 }
+    description: "Can/can't per model and agent; success rate, turnaround, and requirements met per skill; strengths profile; defects caused and merits."
+    source: ["docs/to-do.pdf p.3 (full skill management)", "docs/to-do.pdf p.4–p.5 (track capabilities, performance, defects, merits)"]
+
+  - id: feat-p2-facilities-model
+    kind: feature
+    nature: enabler
+    parent: epic-build-p2
+    product: agentco
+    group: finance-facilities
+    phase: p2
+    state: draft
+    owner_role: bootstrap
+    title: "Facilities model: buildings, floors, rooms, and power as schedulable resources"
+    depends_on: [story-fac-vocabulary, feat-p0-config]
+    wsjf: { business_value: 5, time_criticality: 3, risk_reduction: 5, job_size: 5 }
+    source: ["docs/to-do.pdf p.4 (data model supports company verbiage)"]
+
   # ── Phase 3 ───────────────────────────────────────────────────────────────
   - id: epic-build-p3
     kind: epic
@@ -1741,7 +2512,7 @@ items:
     title: "Multi-product portfolio with per-product capacity shares"
     wsjf: { business_value: 8, time_criticality: 3, risk_reduction: 5, job_size: 5 }
     notes: "Needed before the Console handoff (console phase B)."
-    source: ["docs/agentco-core-engine-design.md §19", "docs/agentco-console-design.md §8.2"]
+    source: ["docs/agentco-core-engine-design.md §19", "docs/agentco-console-design.md §8.2", "docs/to-do.pdf p.3 (project portfolio management)"]
 
   - id: feat-p3-release-train
     kind: feature
@@ -1797,6 +2568,92 @@ items:
     depends_on: [feat-p3-meetings, feat-p3-release-train]
     wsjf: { business_value: 13, time_criticality: 3, risk_reduction: 8, job_size: 5 }
     source: ["docs/agentco-change-config-mgmt-design.md §5.1", "docs/agentco-knowledge-collaboration-design.md §7.6"]
+
+  - id: feat-p3-air
+    kind: feature
+    nature: enabler
+    parent: epic-build-p3
+    product: agentco
+    group: workforce
+    phase: p3
+    state: draft
+    owner_role: bootstrap
+    title: "AI Resources: open-door escalations, hire and fire recommendations, capacity planning"
+    depends_on: [story-wf-open-door, story-wf-org-units, feat-p3-meetings]
+    wsjf: { business_value: 8, time_criticality: 3, risk_reduction: 8, job_size: 5 }
+    source: ["docs/to-do.pdf p.2 (AI Resources department)"]
+
+  - id: feat-p3-recruiting
+    kind: feature
+    nature: enabler
+    parent: epic-build-p3
+    product: agentco
+    group: workforce
+    phase: p3
+    state: draft
+    owner_role: bootstrap
+    title: "Recruiters: model market watch, role-fit search, sandboxed candidate install"
+    depends_on: [feat-p3-air, feat-bench-harness, story-wf-hiring]
+    wsjf: { business_value: 8, time_criticality: 2, risk_reduction: 5, job_size: 5 }
+    description: "New or changed open-source and paid LLM offerings become candidates for open positions; each candidate gets a model card (governance §8.1) before install."
+    source: ["docs/to-do.pdf p.2 (Recruiters)"]
+
+  - id: feat-p3-interviews
+    kind: feature
+    nature: enabler
+    parent: epic-build-p3
+    product: agentco
+    group: workforce
+    phase: p3
+    state: draft
+    owner_role: bootstrap
+    title: "Interviews, onboarding training, provisional period, and CEO sign-off"
+    depends_on: [feat-p3-recruiting, feat-golden-evals, story-wf-onboarding]
+    wsjf: { business_value: 8, time_criticality: 2, risk_reduction: 8, job_size: 5 }
+    description: "Interview suites (skill assessment, ethics pre-alignment, three-song description) run on the eval runner; results are the evidence the CEO signs off on."
+    source: ["docs/to-do.pdf p.4 (onboarding, interview, provisional basis, CEO sign-off)", "docs/to-do.pdf p.5 (interview questions guide skill assessment)"]
+
+  - id: feat-p3-offboarding
+    kind: feature
+    nature: enabler
+    parent: epic-build-p3
+    product: agentco
+    group: workforce
+    phase: p3
+    state: draft
+    owner_role: bootstrap
+    title: "Contract renewals and top-ups, departures, firing for breach, and rehire"
+    depends_on: [feat-p1-contracts, feat-p3-air]
+    wsjf: { business_value: 8, time_criticality: 2, risk_reduction: 8, job_size: 3 }
+    source: ["docs/to-do.pdf p.3 (contracts extended or renewed with owner approval)", "docs/to-do.pdf p.4 (leave and rehire; fired for breach)"]
+
+  - id: feat-p3-quarterly-finance
+    kind: feature
+    nature: business
+    parent: epic-build-p3
+    product: agentco
+    group: finance-facilities
+    phase: p3
+    state: draft
+    owner_role: bootstrap
+    title: "Quarterly financial planning and project portfolio management"
+    depends_on: [feat-p3-multiproduct, story-econ-quarterly, feat-p1-timecards]
+    wsjf: { business_value: 8, time_criticality: 2, risk_reduction: 5, job_size: 5 }
+    source: ["docs/to-do.pdf p.3 (project portfolio management; quarterly financial planning)"]
+
+  - id: feat-p3-pmo-facilities
+    kind: feature
+    nature: business
+    parent: epic-build-p3
+    product: agentco
+    group: finance-facilities
+    phase: p3
+    state: draft
+    owner_role: bootstrap
+    title: "PMO office plans, leases, and custom departments and buildings per portfolio"
+    depends_on: [feat-p2-facilities-model, feat-p3-multiproduct, story-fac-pmo-plans]
+    wsjf: { business_value: 5, time_criticality: 1, risk_reduction: 3, job_size: 5 }
+    source: ["docs/to-do.pdf p.2 (custom departments/buildings for portfolios)", "docs/to-do.pdf p.4 (PMO business plan)"]
 
   # ── Phase 4 ───────────────────────────────────────────────────────────────
   - id: epic-build-p4
@@ -1893,6 +2750,45 @@ items:
     notes: "It's a database, not blob storage: assess client-side encryption, chunking, size limits, restore time, cost, and key custody."
     source: ["owner decisions 2026-09-27 (dec-offsite-backup)"]
 
+  - id: story-unauthorized-change
+    kind: story
+    nature: enabler
+    parent: feat-p4-baselines
+    product: agentco
+    group: governance
+    phase: p4
+    state: draft
+    owner_role: bootstrap
+    title: "Alert security on infrastructure changes made outside change approval"
+    source: ["docs/to-do.pdf p.3 (unauthorized change detection, NIST compliance)"]
+
+  - id: feat-p4-immutable-core
+    kind: feature
+    nature: enabler
+    parent: epic-build-p4
+    product: agentco
+    group: operations
+    phase: p4
+    state: draft
+    owner_role: bootstrap
+    title: "Immutable engine and driver image with atomic rollback and tamper alerts"
+    depends_on: [story-immutable-core, feat-p4-baselines]
+    wsjf: { business_value: 8, time_criticality: 3, risk_reduction: 13, job_size: 8 }
+    source: ["docs/to-do.pdf p.2 (resilience: immutable engine loop and driver, OS tree rollback)"]
+
+  - id: story-contract-breach-alerts
+    kind: story
+    nature: enabler
+    parent: feat-p4-immutable-core
+    product: agentco
+    group: governance
+    phase: p4
+    state: draft
+    owner_role: bootstrap
+    title: "Alert security when an asset, resource, or compute space exceeds its contract"
+    depends_on: [feat-p1-contracts]
+    source: ["docs/to-do.pdf p.2 (assets/resources can't break contracts without alerting security)"]
+
   # ── Phase 5 ───────────────────────────────────────────────────────────────
   - id: epic-build-p5
     kind: epic
@@ -1946,6 +2842,39 @@ items:
     wsjf: { business_value: 3, time_criticality: 1, risk_reduction: 3, job_size: 5 }
     description: "Retention policy for superseded semantic_notes chains; benchmark topic-prefix filtering before adding embeddings."
     source: ["docs/agentco-data-layer-design.md §10"]
+
+  - id: feat-p5-coe
+    kind: feature
+    nature: enabler
+    parent: epic-build-p5
+    product: agentco
+    group: workforce
+    phase: p5
+    state: draft
+    owner_role: bootstrap
+    title: "Centers of excellence: domain experts with high compute and full area context"
+    depends_on: [feat-p3-air, feat-p2-knowledge]
+    wsjf: { business_value: 5, time_criticality: 1, risk_reduction: 3, job_size: 5 }
+    source: ["docs/to-do.pdf p.5 (centers of excellence)"]
+
+  - id: feat-p5-model-retro
+    kind: feature
+    nature: enabler
+    parent: epic-evals-bench
+    product: agentco
+    group: evals
+    phase: p5
+    state: draft
+    owner_role: bootstrap
+    title: "Retroactive review by new models: replay history in a simulated copy of the company"
+    depends_on: [feat-p0-sim, feat-p4-eval-gate, feat-p3-recruiting]
+    wsjf: { business_value: 8, time_criticality: 1, risk_reduction: 8, job_size: 8 }
+    description: >-
+      When a new model becomes available, it reviews the old model's success and
+      failure history, says how it would have handled each case, and the
+      difference is measured by replaying a simulated copy of the company
+      against the actual one (core engine §11.3, §12).
+    source: ["docs/to-do.pdf p.1–p.2 (retroactive agent feedback)"]
 
 # ════════════════════════════════════════════════════════════════════════════
 # CONSOLE (Product 0)
@@ -2179,6 +3108,58 @@ items:
     title: "Core-owned composer for chat, meeting, and feedback messages"
     source: ["docs/agentco-console-design.md §6.6"]
 
+  - id: story-ca-contract-approvals
+    kind: story
+    nature: business
+    parent: feat-ca-protected-pages
+    product: console
+    group: console-core
+    phase: console-a
+    state: draft
+    owner_role: bootstrap
+    title: "Contract renewal and top-up approvals with timecard cost evidence"
+    depends_on: [feat-p1-contracts, feat-p1-timecards]
+    source: ["docs/to-do.pdf p.3 (contracts extended or renewed with owner approval)"]
+
+  - id: story-ca-staffing-approvals
+    kind: story
+    nature: business
+    parent: feat-ca-protected-pages
+    product: console
+    group: console-core
+    phase: console-a
+    state: draft
+    owner_role: bootstrap
+    title: "Hire and fire approvals with the CEO's evidence and AI Resources' recommendation"
+    depends_on: [feat-p3-interviews, feat-p3-offboarding]
+    source: ["docs/to-do.pdf p.2 (AI Resources final recommendation to human)", "docs/to-do.pdf p.4 (CEO signs off on hires and fires)"]
+
+  - id: story-ca-open-door
+    kind: story
+    nature: business
+    parent: feat-ca-protected-pages
+    product: console
+    group: console-core
+    phase: console-a
+    state: draft
+    owner_role: bootstrap
+    title: "Open-door requests: join a meeting with the agent and AI Resources"
+    depends_on: [feat-p3-air, story-ca-composer]
+    source: ["docs/to-do.pdf p.2 (open door policy)"]
+
+  - id: story-ca-lease-approvals
+    kind: story
+    nature: business
+    parent: feat-ca-protected-pages
+    product: console
+    group: console-core
+    phase: console-a
+    state: draft
+    owner_role: bootstrap
+    title: "Facility lease and expansion approvals with the PMO business plan"
+    depends_on: [feat-p3-pmo-facilities]
+    source: ["docs/to-do.pdf p.2 (propose leasing another building)", "docs/to-do.pdf p.4 (PMO business plan)"]
+
   - id: feat-ca-min-ui
     kind: feature
     nature: business
@@ -2235,6 +3216,51 @@ items:
     depends_on: [feat-p0-roster, feat-ca-shell]
     wsjf: { business_value: 8, time_criticality: 3, risk_reduction: 3, job_size: 5 }
     source: ["docs/agentco-console-design.md §5.3"]
+
+  - id: feat-ca-todo-import
+    kind: feature
+    nature: business
+    parent: epic-console-a
+    product: console
+    group: console-core
+    phase: console-a
+    state: draft
+    owner_role: bootstrap
+    title: "Import the owner's Microsoft To Do list into the backlog as draft items"
+    depends_on: [dec-todo-integration, feat-ca-roadmap-board]
+    wsjf: { business_value: 8, time_criticality: 5, risk_reduction: 3, job_size: 3 }
+    description: >-
+      The owner captures ideas in Microsoft To Do (docs/to-do.pdf is a print of
+      the AgentCo list). Import brings each task in as a draft or funnel item
+      with a source pointing back to the To Do task; sub-tasks become children
+      or notes; nothing is prioritized until the owner triages it.
+    source: ["docs/to-do.pdf p.2 (project owner integration with Microsoft ToDo)"]
+
+  - id: story-ca-todo-read
+    kind: story
+    nature: business
+    parent: feat-ca-todo-import
+    product: console
+    group: console-core
+    phase: console-a
+    state: draft
+    owner_role: bootstrap
+    title: "Read the AgentCo To Do list, with its sub-tasks, through the chosen integration"
+    source: ["docs/to-do.pdf p.2 (project owner integration with Microsoft ToDo)"]
+
+  - id: story-ca-todo-triage
+    kind: story
+    nature: business
+    parent: feat-ca-todo-import
+    product: console
+    group: console-ui
+    phase: console-a
+    state: draft
+    owner_role: bootstrap
+    title: "Triage view: map each imported task to a new item, an existing item, or dismiss it"
+    depends_on: [story-ca-todo-read]
+    notes: "Shows which To Do tasks have no roadmap item yet, the same coverage check done by hand for docs/to-do.pdf."
+    source: ["docs/to-do.pdf p.2 (project owner integration with Microsoft ToDo)"]
 
   - id: epic-console-b
     kind: epic
@@ -2326,7 +3352,7 @@ items:
     owner_role: product_owner
     title: "Engine-backed portfolio overview, Kanban, budgets, and capacity pages"
     wsjf: { business_value: 8, time_criticality: 1, risk_reduction: 2, job_size: 5 }
-    source: ["docs/agentco-console-design.md §5.1"]
+    source: ["docs/agentco-console-design.md §5.1", "docs/to-do.pdf p.3 (project portfolio management)"]
 
   - id: feat-cc-personal
     kind: feature
@@ -2380,6 +3406,85 @@ items:
     title: "Sync worthwhile shell/style improvements back to the NWN editor (manual)"
     source: ["docs/agentco-console-design.md §12"]
 
+  - id: feat-cc-workforce-pages
+    kind: feature
+    nature: business
+    parent: epic-console-c
+    product: console
+    group: console-ui
+    phase: console-c
+    state: draft
+    owner_role: product_owner
+    title: "People pages: recruiting board, agent records, and the skills matrix"
+    depends_on: [feat-p3-interviews, feat-p2-skills, feat-p1-timecards, feat-ca-agent-queues, story-wf-console-pages]
+    wsjf: { business_value: 8, time_criticality: 1, risk_reduction: 3, job_size: 5 }
+    source: ["docs/to-do.pdf p.2–p.5 (owner to-do 2026-09-29)"]
+
+  - id: story-cc-recruiting-board
+    kind: story
+    nature: business
+    parent: feat-cc-workforce-pages
+    product: console
+    group: console-ui
+    phase: console-c
+    state: draft
+    owner_role: product_owner
+    title: "Recruiting board: candidates from market scan through interview to provisional hire"
+    source: ["docs/to-do.pdf p.2 (Recruiters)", "docs/to-do.pdf p.4 (interview and provisional basis)"]
+
+  - id: story-cc-agent-record
+    kind: story
+    nature: business
+    parent: feat-cc-workforce-pages
+    product: console
+    group: console-ui
+    phase: console-c
+    state: draft
+    owner_role: product_owner
+    title: "Agent page tabs: contract, timecard, skills and strengths, performance record"
+    source: ["docs/to-do.pdf p.3–p.5 (contracts, skills, performance, timecard)"]
+
+  - id: story-cc-skills-matrix
+    kind: story
+    nature: business
+    parent: feat-cc-workforce-pages
+    product: console
+    group: console-ui
+    phase: console-c
+    state: draft
+    owner_role: product_owner
+    title: "Skills matrix: roles and agents against skills, with success rate and turnaround"
+    source: ["docs/to-do.pdf p.3 (full skill management)"]
+
+  - id: feat-cc-facilities-pages
+    kind: feature
+    nature: business
+    parent: epic-console-c
+    product: console
+    group: console-ui
+    phase: console-c
+    state: draft
+    owner_role: product_owner
+    title: "Facilities floor plan: buildings, floors, rooms, and power utilization"
+    depends_on: [feat-p2-facilities-model, feat-ca-company-diagram]
+    wsjf: { business_value: 8, time_criticality: 1, risk_reduction: 2, job_size: 5 }
+    notes: "Links to the live company diagram: which agents occupy which rooms, and where capacity is short."
+    source: ["docs/to-do.pdf p.4 (buildings, floors, rooms, power)"]
+
+  - id: feat-cc-finance-pages
+    kind: feature
+    nature: business
+    parent: epic-console-c
+    product: console
+    group: console-ui
+    phase: console-c
+    state: draft
+    owner_role: product_owner
+    title: "Finance pages: quarterly plan and cost per change, feature, and incident"
+    depends_on: [feat-p3-quarterly-finance, feat-p1-timecards]
+    wsjf: { business_value: 8, time_criticality: 1, risk_reduction: 3, job_size: 3 }
+    source: ["docs/to-do.pdf p.3 (quarterly financial planning)", "docs/to-do.pdf p.5 (cost measured on every change/feature/incident)"]
+
 # ════════════════════════════════════════════════════════════════════════════
 # FUTURE SCOPE
 # ════════════════════════════════════════════════════════════════════════════
@@ -2403,6 +3508,72 @@ items:
       - "docs/agentco-service-management-design.md §18"
       - "docs/agentco-escalation-design.md §9"
       - "docs/agentco-core-engine-design.md §19"
+
+  - id: epic-agent-life
+    kind: epic
+    nature: business
+    product: agentco
+    group: future
+    phase: later
+    state: funnel
+    owner_role: human
+    title: "Agent life: optional music listening and song interpretation"
+    wsjf: { business_value: 3, time_criticality: 1, risk_reduction: 1, job_size: 5 }
+    description: >-
+      Agents can, but don't have to, listen to music; the option is stated in
+      their onboarding agreements. They may submit how they interpret a song,
+      and the cost of listening is tracked like any other work.
+    source: ["docs/to-do.pdf p.3 (agents can listen to music)"]
+
+  - id: feat-music-listening
+    kind: feature
+    nature: business
+    parent: epic-agent-life
+    product: agentco
+    group: future
+    phase: later
+    state: draft
+    owner_role: bootstrap
+    title: "Optional music listening, song interpretation feedback, and cost roll-up"
+    depends_on: [dec-music-modality, feat-p1-timecards]
+    wsjf: { business_value: 3, time_criticality: 1, risk_reduction: 1, job_size: 3 }
+    source: ["docs/to-do.pdf p.3 (agents can listen to music)"]
+
+  - id: story-music-optin
+    kind: story
+    nature: business
+    parent: feat-music-listening
+    product: agentco
+    group: future
+    phase: later
+    state: draft
+    owner_role: bootstrap
+    title: "Opt-in clause in the onboarding agreement; listening never displaces assigned work"
+    source: ["docs/to-do.pdf p.3 (stated in their onboarding agreements)"]
+
+  - id: story-music-feedback
+    kind: story
+    nature: business
+    parent: feat-music-listening
+    product: agentco
+    group: future
+    phase: later
+    state: draft
+    owner_role: bootstrap
+    title: "Agents submit feedback on a song: how they interpret it"
+    source: ["docs/to-do.pdf p.3 (agents can submit feedback about a song)"]
+
+  - id: story-music-cost
+    kind: story
+    nature: business
+    parent: feat-music-listening
+    product: agentco
+    group: finance-facilities
+    phase: later
+    state: draft
+    owner_role: bootstrap
+    title: "Track listening cost (compute and RAM seconds, LLM usage) on timecards and roll it up"
+    source: ["docs/to-do.pdf p.3 (even the cost of listening to music is tracked and rolled up)"]
 
 # ════════════════════════════════════════════════════════════════════════════
 # OWNER DECISIONS
@@ -2784,3 +3955,120 @@ items:
     resolution: "Generated from a curated list, seeded for replay; the owner can rename (option a)."
     date: "2026-09-27"
     source: ["owner request 2026-09-27", "docs/agentco-core-engine-design.md §3.4"]
+
+  - id: dec-ceo-role
+    kind: decision
+    product: agentco
+    group: decisions
+    phase: design
+    state: awaiting_human
+    owner_role: human
+    title: "Who is the CEO, and who is the owner's first point of contact?"
+    question: >-
+      The to-do says the CEO is always the first interface to the human and signs
+      off on every hire and fire. Today the Executive Director is the top role and
+      Client Communications is the only voice to the owner (directive D12).
+      How should the CEO fit?
+    options:
+      - { id: a, label: "The Executive Director is the CEO; Client Comms stays the single voice, speaking for the CEO" }
+      - { id: b, label: "The Executive Director is the CEO and becomes the owner's first contact; Client Comms drafts and frames" }
+      - { id: c, label: "Add a new CEO role above the Executive Director" }
+    recommended: a
+    notes: "Option a changes titles only. Options b and c change D12 and the escalation design's goal 3, and are system changes."
+    source: ["docs/to-do.pdf p.4 (CEO is always the first interface to the human controller; CEO signs off on hires and fires)"]
+
+  - id: dec-agent-contract-model
+    kind: decision
+    product: agentco
+    group: decisions
+    phase: design
+    state: awaiting_human
+    owner_role: human
+    title: "How does an agent's contract relate to its engagement?"
+    question: "Is the to-do's contract a new long-lived agreement, or the existing engagement's contract section?"
+    options:
+      - { id: a, label: "New long-lived contract (term, rate, compute grant, flex budget); per-assignment engagements are derived within it" }
+      - { id: b, label: "Extend the engagement's contract section; no separate record" }
+    recommended: a
+    notes: "Engagements are per iteration (agent API design §6.1); renewals, top-ups, and rehire need something that outlives them."
+    source: ["docs/to-do.pdf p.3 (contracts)", "docs/agentco-agent-api-policy-design.md §6"]
+
+  - id: dec-hire-approval-scope
+    kind: decision
+    product: agentco
+    group: decisions
+    phase: design
+    state: awaiting_human
+    owner_role: human
+    title: "Which hires and fires need the owner's approval?"
+    question: >-
+      The roster hires automatically when the scheduler scales a role up (core
+      engine §3.4). Should every hire and fire go to the owner, or only some?
+    options:
+      - { id: a, label: "New model or new role → owner approves; scale-up within approved headcount → CEO sign-off only" }
+      - { id: b, label: "Every hire and fire goes to the owner" }
+    recommended: a
+    source: ["docs/to-do.pdf p.2 (AI Resources final recommendation to human)", "docs/to-do.pdf p.4 (CEO signs off on all hires and fires)"]
+
+  - id: dec-facility-vocabulary
+    kind: decision
+    product: agentco
+    group: decisions
+    phase: design
+    state: awaiting_human
+    owner_role: human
+    title: "Company vocabulary: in the data model, or only in the console?"
+    question: "Should buildings, floors, rooms, and power be data model entities, or console labels over technical names?"
+    options:
+      - { id: a, label: "Data model entities with technical attributes (e.g. room.ram_gb, power.cpu_cores)" }
+      - { id: b, label: "Technical names in the data model; company terms in the console only" }
+    recommended: a
+    notes: "The to-do asks for the data model to support the vocabulary."
+    source: ["docs/to-do.pdf p.4 (data model supports company verbiage)"]
+
+  - id: dec-todo-integration
+    kind: decision
+    product: console
+    group: decisions
+    phase: console-a
+    state: awaiting_human
+    owner_role: human
+    title: "How does the backlog read the owner's Microsoft To Do list?"
+    question: "Which integration should feat-ca-todo-import use?"
+    options:
+      - { id: a, label: "Microsoft Graph, read-only delegated access; token held with DPAPI" }
+      - { id: b, label: "Manual export (print or copy) plus an import script; no connection" }
+      - { id: c, label: "Microsoft Graph read/write: also mark tasks done when their items ship" }
+    recommended: a
+    notes: "The first external service that holds owner data: classify it Internal and record Microsoft as a supplier (governance §8.2)."
+    source: ["docs/to-do.pdf p.2 (project owner integration with Microsoft ToDo)"]
+
+  - id: dec-music-modality
+    kind: decision
+    product: agentco
+    group: decisions
+    phase: later
+    state: draft
+    owner_role: human
+    title: "How do agents 'listen' to music?"
+    question: "Audio-capable models on the audio itself, derived features (lyrics, tempo, key, structure) for text models, or both?"
+    options:
+      - { id: a, label: "Audio-capable model on the audio" }
+      - { id: b, label: "Derived features given to text models" }
+      - { id: c, label: "Both, set per contract" }
+    notes: "The local models are text-only today. Also affects the three-song interview test (story-wf-hiring)."
+    source: ["docs/to-do.pdf p.3 (music)", "docs/to-do.pdf p.4 (listen to 3 different songs)"]
+
+  - id: dec-performance-product
+    kind: decision
+    product: agentco
+    group: decisions
+    phase: design
+    state: draft
+    owner_role: human
+    title: "Register Performance as a product with its own capacity share?"
+    question: "Should performance be a registered product like the Console, with a capacity share, or a cross-cutting backlog?"
+    options:
+      - { id: a, label: "Registered product with a capacity share" }
+      - { id: b, label: "Cross-cutting backlog tagged performance, no share" }
+    source: ["docs/to-do.pdf p.4 (performance as a first class product)"]
