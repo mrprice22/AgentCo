@@ -3224,7 +3224,7 @@ items:
     product: console
     group: console-core
     phase: console-a
-    state: draft
+    state: in_progress
     owner_role: bootstrap
     title: "Import the owner's Microsoft To Do list into the backlog as draft items"
     depends_on: [dec-todo-integration, feat-ca-roadmap-board]
@@ -3246,6 +3246,10 @@ items:
     state: draft
     owner_role: bootstrap
     title: "Read the AgentCo To Do list, with its sub-tasks, through the chosen integration"
+    notes: >-
+      bin/todo-extract.py already parses a printed To Do list (tasks,
+      sub-steps, pages). Its parser can serve dec-todo-integration option b
+      (manual export) as is.
     source: ["docs/to-do.pdf p.2 (project owner integration with Microsoft ToDo)"]
 
   - id: story-ca-todo-triage
@@ -3259,8 +3263,32 @@ items:
     owner_role: bootstrap
     title: "Triage view: map each imported task to a new item, an existing item, or dismiss it"
     depends_on: [story-ca-todo-read]
-    notes: "Shows which To Do tasks have no roadmap item yet, the same coverage check done by hand for docs/to-do.pdf."
+    notes: "Shows which To Do tasks have no roadmap item yet. bin/todo-extract.py does the same coverage check for printed drops today (story-ca-todo-interim-intake)."
     source: ["docs/to-do.pdf p.2 (project owner integration with Microsoft ToDo)"]
+
+  - id: story-ca-todo-interim-intake
+    kind: story
+    nature: enabler
+    parent: feat-ca-todo-import
+    product: console
+    group: console-core
+    phase: console-a
+    state: in_review
+    owner_role: bootstrap
+    title: "Interim to-do intake: the todo-intake skill for printed To Do drops"
+    size_points: 2
+    acceptance_criteria:
+      - "Drops are committed as dated snapshots at docs/to-do/YYYY-MM-DD.pdf and never re-synced; roadmap.yaml is the source of truth"
+      - "bin/todo-extract.py lists every task and sub-step with its page and best-matching roadmap item, as a table or JSON"
+      - "The todo-intake skill gives every line one outcome (covered, extends, new item, owner decision, dismissed) and reports all of them"
+      - "Unclear lines go to the owner in one batched question; roadmap-lint is clean before the commit"
+      - "The skill stops and points to the console once feat-ca-todo-import is done"
+    notes: >-
+      .claude/skills/todo-intake/SKILL.md and bin/todo-extract.py. Superseded
+      when feat-ca-todo-import ships. First run against docs/to-do.pdf: 86
+      lines; the 8 the extractor left unmatched were all covered in other
+      words.
+    source: ["conversation 2026-10-01 (owner: pipeline for to-do drops until full integration)"]
 
   - id: epic-console-b
     kind: epic
